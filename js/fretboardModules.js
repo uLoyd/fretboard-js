@@ -360,7 +360,8 @@ export class Fretboard{
         return this;
     }
 
-    // checkButtons is optional. If passed it will mark buttons related to currently displayed sounds from the scale
+    // checkButtons is optional (dom element containing 12 buttons from A to G#).
+    // If passed it will mark buttons related to currently displayed sounds from the scale
     updateScaleToTonic(newTonic, checkButtons) {
         this.currentSounds = this.currentScale.shiftToTonic(sounds.indexOf(newTonic));
         this.addSoundMarksOnStrings(checkButtons);
@@ -392,6 +393,7 @@ export class Fretboard{
     }
 
     findCurrentExactSound = sound => this.currentExactSounds.find(x => x.toString() === sound.toString());
+
     findCurrentExactSoundIndex = sound => this.currentExactSounds.findIndex(x => x.toString() === sound.toString());
 
     // Sound's supposed to be Sound instance
@@ -409,6 +411,17 @@ export class Fretboard{
 
       if(foundSound !== -1)
         this.currentExactSounds.splice(foundSound, 1);
+
+      return this;
+    }
+
+    // Removes "sound" both from general sound array (currentSounds) and exact sound array (currentExactSounds)
+    // based on soundIndex. It will remove ALL instances of sound regardless of octave
+    removeSoundAll(soundIndex) {
+      this.removeCurrentSound(soundIndex);
+
+      const exacts = this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]);
+      exacts.forEach(sound => this.removeCurrentExactSound(sound));
 
       return this;
     }
@@ -432,21 +445,33 @@ export class Fretboard{
     // Creates "marks" of sounds on corresponding frets. Shows the scale on fretboard in short.
     // Adds sound marks for EVERY sound on ALL strings!
     addSoundMarksOnStrings(checkButtons) {
-        this.stringInstances.forEach((string) => {
-            string.clearAllFrets();
-
-            this.currentSounds.forEach((sound, index) => {
-                if (sound)
-                    string.markSound(index);
-            });
-
-            this.currentExactSounds.forEach(sound => string.markExactSound(sound));
-        });
+        this.stringInstances.forEach(string => this.addSoundMarksOnString(string));
 
         if(checkButtons)
             this.checkSoundButtonClasses(checkButtons);
         else
             return this;
+    }
+
+    // Index of a string same as in the "tuning" array passed to Fretboard class constructor
+    // StringLane instance is passed to addSoundMarksOnString which then returns Fretboard instance
+    addSoundMarksOnStringIndex(stringIndex) {
+        const string = this.stringInstances[stringIndex];
+        return this.addSoundMarksOnString(string);
+    }
+
+    // Adds sound marks on one specific string. "string" parameter is a StringLane instance
+    addSoundMarksOnString(string) {
+        string.clearAllFrets();
+
+        this.currentSounds.forEach((sound, index) => {
+          if (sound)
+            string.markSound(index);
+        });
+
+        this.currentExactSounds.forEach(sound => string.markExactSound(sound));
+
+        return this;
     }
 
     // If buttons representing sounds are present it will toggle the display of them depending
@@ -457,7 +482,7 @@ export class Fretboard{
         const {classOff, classOn, buttons} = checkButtons;
         buttons.forEach((button) => {
             if(button.tagName === 'BUTTON'){
-              // split in two ifs to not make a check too long
+                // split in two ifs to not make a check too long
                 if(this.currentSounds[iterator] && button.classList.contains(classOff)){
                     button.classList.toggle(classOn);
                     button.classList.toggle(classOff);
