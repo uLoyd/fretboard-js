@@ -86,3 +86,7 @@
   text-align: center;
   border: solid 1px black;
 }
+
+#fretboard div {
+  user-select: none;
+}

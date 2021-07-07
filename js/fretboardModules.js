@@ -1,4 +1,5 @@
 import { createDomElement } from "./utils.js";
+import { Sound } from "./Sound.js";
 
 export const sounds = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
 
@@ -16,12 +17,13 @@ export const buttonSoundClick = (fretboardInstance) => {
     }
 }
 
-export const optionSelect = (selected, classes, options) => {
+// valueCallback is just a function that returns what value should be assigned to each "option" element
+export const optionSelect = (selected, classes, options, valueCallback) => {
     const select = createDomElement('select', classes instanceof Array ? classes : ['col'])
 
     options.forEach((curOption) => {
         const option = createDomElement('option', [], curOption);
-        option.value = sounds.indexOf(curOption);
+        option.value = valueCallback(curOption);
 
         if(curOption === selected)
             option.selected = true;
@@ -30,141 +32,6 @@ export const optionSelect = (selected, classes, options) => {
     });
 
     return select;
-}
-
-export class Sound {
-  constructor(soundSymbol, octave) {
-    this.sound = soundSymbol;
-    this.octave = octave;
-  }
-
-  // Distance relative to A4 (arguments defaults to "this" object)
-  getDistanceFromNote(note = this.sound, octave = this.octave) {
-    const basePos = sounds.indexOf(note);
-    const multiplyOctave = octave - 4; // minus 4 because we're counting from A4
-    let pos = 12 * multiplyOctave + basePos;
-    if(basePos > 2) pos -= 12;         // offset made because in music the scale starts at C not A
-    return pos;
-  }
-
-  // Distance relative to A4 - returns only the sound symbol without the octave
-  getNoteFromDistance(step) {
-    let id = (step > 11 || step < -11 ? step % 12 : step);
-    id = (id < 0 ? 12 + id : id);
-
-    return Math.round(id);
-  }
-
-  // Distance relative to A4
-  getFrequencyFromDistance(distance = this.getDistanceFromNote()) {
-    return A4 * Math.pow(2, distance / 12); // Returns a perfect frequency of note x steps from A4
-  }
-
-  // Distance relative to A4
-  getOctaveFromDistance(distance) {
-    let octaves = 4;
-
-    while(true){
-      if(distance < -11){     // Checking if offset is needed as scale starts at C and not A
-        --octaves;
-        distance += 12;
-      }
-      else if(distance > 11){ // Checking if offset is needed as scale starts at C and not A
-        ++octaves;
-        distance -= 12;
-      }
-      else
-        break;
-    }
-
-    if(distance < -9) octaves--;
-    if(distance > 2) octaves++;
-    return octaves;
-  }
-
-  // arguments are supposed to be instances of Sound class
-  distanceBetweenNotes(sound1 = new Sound('A', 4), sound2 = this) {
-    const dist1 = this.getDistanceFromNote(sound1.sound, sound1.octave);
-    const dist2 = this.getDistanceFromNote(sound2.sound, sound2.octave);
-
-    return dist1 - dist2;
-  }
-
-  toString = () => `${this.sound}${this.octave}`;
-}
-
-export class ScaleLib{
-    constructor(scales) {
-        this.scales = [];
-
-        if(scales)
-            scales.forEach(scale => this.scales.push(new Scale(scale)));
-
-        return this;
-    }
-
-    createAllScaleElements(target){
-        this.scales.forEach(scale => scale.createDomElement(target));
-
-        return this;
-    }
-
-    findById(id) {
-        return this.scales.find(scale => scale.id === id);
-    }
-}
-
-export class Scale{
-    constructor(data) {
-        this.id = data['Scale.id'] ?? data.id;
-
-        this.sounds = data['Scale.sounds'] ?
-            data['Scale.sounds'].split('').map(x => x === '1') :
-            data.scale ?? data.sounds?.split('').map(x => x === '1');
-
-        this.name = data['Scale.name'] ?? data.name;
-        this.tonic = data['Scale.tonic'] ?? data.tonic;
-
-        return this;
-    }
-
-    createDomElement(target) {
-        const elem = createDomElement('option', null, this.name);
-        elem.value = this.id;
-        target.appendChild(elem);
-
-        return elem;
-    }
-
-    shiftToTonic(targetTonic) {
-        const diff = this.tonic - targetTonic;
-        const arrCopy = [...this.sounds];
-
-        if(diff === 0)
-            return arrCopy;
-
-        return arrCopy.splice(diff, arrCopy.length - diff).concat(arrCopy);
-    }
-
-    async saveNewScale(url) {
-        const rawResponse = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                scale: this.sounds,
-                name: this.name,
-                tonic: this.tonic
-            })
-        });
-
-        const response = await rawResponse;
-        const jsonResponse = await response.json();
-
-        return { response: response, json: jsonResponse }
-    }
 }
 
 export class Note{
@@ -191,15 +58,28 @@ export class Note{
 }
 
 export class Fret{
-    constructor() {
+    constructor(callback) {
         this.domElement = null;
         this.mark = null;
+        this.callback = (mark) => {
+          return (evt) => {
+            evt.stopPropagation();
+
+            const tuning = new Sound(sounds[this.#getStringTuning(evt)], this.#getStringOctave(evt));
+            const fret = Array.prototype.indexOf.call(this.domElement.parentNode.children, mark ? evt.target.parentNode : evt.target) - 2;
+            const fretSound = Sound.getNoteFromDistance(tuning.getDistanceFromNote() + fret);
+            const fretOctave = Sound.getOctaveFromDistance(tuning.getDistanceFromNote() + fret);
+
+            callback(tuning, new Sound(sounds[fretSound], fretOctave), !!this.mark, evt);
+          }
+        }
 
         return this;
     }
 
     create(target) {
         this.domElement = createDomElement('div', ['col', 'fret_place', 'd-flex', 'justify-content-center']);
+        this.domElement.addEventListener('click', this.callback());
         target.appendChild(this.domElement);
 
         return this;
@@ -208,7 +88,7 @@ export class Fret{
     noteMark(note) {
         this.mark = note;
         this.domElement.appendChild(this.mark.domElement);
-
+        this.mark.domElement.addEventListener('click', this.callback(true));
         return this;
     }
 
@@ -219,10 +99,14 @@ export class Fret{
         this.domElement.removeChild(this.mark.domElement);
         this.mark = null;
     }
+
+    #getStringTuning = () => this.domElement.parentNode.children[0].value ?? sounds.indexOf(this.domElement.parentNode.children[0].innerText);
+
+    #getStringOctave = () => this.domElement.parentNode.children[1].value ?? parseInt(this.domElement.parentNode.children[1].innerText);
 }
 
 export class StringLane {
-    constructor(frets, tuning, tuningChange, octaveRange, octaveChange) {
+    constructor(frets, tuning, tuningChange, octaveRange, octaveChange, callback) {
         this.frets = frets;
         this.tuning = tuning;
         this.tuningElement = null;
@@ -231,6 +115,7 @@ export class StringLane {
         this.fretInstances = [];
         this.octaveRange = octaveRange;
         this.octaveChange = octaveChange;
+        this.callback = callback;
 
         return this;
     }
@@ -239,12 +124,12 @@ export class StringLane {
         this.lane = createDomElement('div', ['row', 'bg-dark', 'fret_lane']);
         target.appendChild(this.lane);
 
-        this.tuningElement = this.tuningChange ? optionSelect(this.tuning.sound, [], sounds) :
+        this.tuningElement = this.tuningChange ? optionSelect(this.tuning.sound, [], sounds, opt => sounds.indexOf(opt)) :
             createDomElement('div', ['col', 'bg-success', 'fixed_tuning'], this.tuning.sound);
         this.lane.appendChild(this.tuningElement);
         this.tuningElement.addEventListener('change', this.updateTuning);
 
-        this.octaveElement = this.octaveChange ? optionSelect(this.tuning.octave, [], this.octaveRange) :
+        this.octaveElement = this.octaveChange ? optionSelect(this.tuning.octave, [], this.octaveRange, opt => opt) :
             createDomElement('div', ['col', 'bg-info', 'fixed_octave'], this.tuning.octave);
         this.lane.appendChild(this.octaveElement);
 
@@ -252,7 +137,7 @@ export class StringLane {
         const fretsDisplay = this.frets + 1;
 
         for(let i = 0; i < fretsDisplay; i++)
-            this.fretInstances.push(new Fret().create(this.lane));
+            this.fretInstances.push(new Fret(this.callback).create(this.lane));
 
         return this;
     }
@@ -287,8 +172,8 @@ export class StringLane {
 
         places.forEach(place => {
             const dist = this.tuning.getDistanceFromNote() + place; // Distance of new sound = ( distance between A4 and this tuning ) + fretIndex
-            const octave = this.tuning.getOctaveFromDistance(dist); // Gets octave of new sound
-            const note = sounds[this.tuning.getNoteFromDistance(dist)]; // Gets symbol of new sound
+            const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
+            const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
             const sound = new Sound(note, octave); // Creates new sound
             const mark = new Note(sound).create();
             this.fretInstances[place].noteMark(mark);
@@ -320,25 +205,26 @@ export class StringLane {
 }
 
 export class Fretboard{
-    constructor(container, frets, tuning, allowTuningChange, octaveRange, allowOctaveChange){
-        this.frets = frets;
-        this.strings = tuning.length;
+    constructor(obj) {
+        this.frets = obj.frets;
+        this.strings = obj.tuning.length;
         this.stringInstances = [];
-        this.domElement = container;
+        this.domElement = obj.container;
         this.currentScale = null;
         this.currentSounds = new Array(12).fill(false); // Meant for sounds in all octaves
         this.currentExactSounds = []; // Meant for Sound instances as those specify the exact octave
-        this.tuning = tuning;
-        this.allowTuningChange = allowTuningChange;
-        this.allowOctaveChange = allowOctaveChange;
+        this.tuning = obj.tuning;
+        this.allowTuningChange = !!obj.allowTuningChange;
+        this.allowOctaveChange = !!obj.allowOctaveChange;
+        this.fretsClick = obj.fretsClick ?? function(){}; // just and empty function to replace missing callback
         this.octaveRange = [4]; // 4 is just a random placeholder. If nothing would be passed
                                 // here it'd be the only possible option for every "string" to
                                 // be in 4th octave indefinitely
 
-        if(octaveRange){
+        if(obj.octaveRange){
           this.octaveRange.pop(); // Throws out the default value
 
-          for(let i = octaveRange.min; i <= octaveRange.max; i++)
+          for(let i = obj.octaveRange.min; i <= obj.octaveRange.max; i++)
             this.octaveRange.push(i);
         }
 
@@ -353,7 +239,8 @@ export class Fretboard{
                   this.tuning[i],
                   this.allowTuningChange,
                   this.octaveRange,
-                  this.allowOctaveChange
+                  this.allowOctaveChange,
+                  this.fretsClick
                 ).create(this.domElement)
             );
 
@@ -378,17 +265,19 @@ export class Fretboard{
     }
 
     addCurrentSound(soundIndex) {
+      this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
       this.currentSounds[soundIndex] = true;
       return this;
     }
 
     removeCurrentSound(soundIndex) {
+      this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
       this.currentSounds[soundIndex] = false;
       return this;
     }
 
     switchCurrentSound(soundIndex) {
-      this.currentSounds[soundIndex] = !this.currentSounds[soundIndex];
+      this.currentSounds[soundIndex] ? this.removeCurrentSound(soundIndex) : this.addCurrentSound(soundIndex);
       return this;
     }
 

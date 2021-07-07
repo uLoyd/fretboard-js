@@ -1,14 +1,10 @@
-export const getLastUrlParam = () => {
-    return new URL(location).pathname.split('/').slice(-1).pop();
-}
-
 export const createDomElement = (selector, classes, text) => {
     const elem = document.createElement(selector);
 
     if(classes)
         classes.forEach(cl => elem.classList.add(cl));
 
-    if(text)
+    if(text != null)
         elem.innerText = text;
 
     return elem;
