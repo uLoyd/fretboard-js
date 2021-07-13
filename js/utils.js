@@ -1,3 +1,6 @@
+export const uuidv4 = () => ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+
 export const createDomElement = (selector, classes, text) => {
     const elem = document.createElement(selector);
 
@@ -19,4 +22,21 @@ export const getData = async (url, failedFetchAlert) => {
     }
 
     return await data.json();
+}
+
+// valueCallback is just a function that returns what value should be assigned to each "option" element
+export const optionSelect = (selected, classes, options, valueCallback) => {
+  const select = createDomElement('select', classes instanceof Array ? classes : ['col'])
+
+  options.forEach((curOption) => {
+    const option = createDomElement('option', [], curOption);
+    option.value = valueCallback(curOption);
+
+    if(curOption === selected)
+      option.selected = true;
+
+    select.appendChild(option);
+  });
+
+  return select;
 }

@@ -1,54 +1,48 @@
-#fretboard {
-  /*position: relative;
-  right: 10vw;
-  min-width: 130%;*/
-}
-
-.na{
+.na{ /* Note A */
   background-color: #1F55BC;
 }
 
-.nas{
+.nas{ /* Note A# */
   background-color: #228692;
 }
 
-.nb{
+.nb{ /* Note B */
   background-color: #1a826e;
 }
 
-.nc{
-  background-color: #1FDDAF;
+.nc{ /* Note C */
+  background-color: #055340;
 }
 
-.ncs{
+.ncs{ /* Note C# */
   background-color: #AA51A1;
 }
 
-.nd{
+.nd{ /* Note D */
   background-color: #b15366;
 }
 
-.nds{
+.nds{ /* Note D# */
   background-color: #525229;
 }
 
-.ne{
+.ne{ /* Note E */
   background-color: #249041;
 }
 
-.nf{
+.nf{ /* Note F */
   background-color: #90673e;
 }
 
-.nfs{
+.nfs{ /* Note F# */
   background-color: #e3004b;
 }
 
-.ng{
+.ng{ /* Note G */
   background-color: #ea6d35;
 }
 
-.ngs{
+.ngs{ /* Note G# */
   background-color: #0e3803;
 }
 
@@ -72,17 +66,7 @@
   width: 4%;
 }
 
-.custom-select{
-  width: 20% !important;
-}
-/*
-.fret_lane{
-  max-width: 90vw;
-  margin-left: 10vw;
-}
-*/
-.fixed_tuning{
-  width: 2vw;
+.fixed_tuning, .fixed_octave{
   text-align: center;
   border: solid 1px black;
 }

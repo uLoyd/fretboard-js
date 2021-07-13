@@ -1,4 +1,5 @@
-import { A4, sounds } from "./fretboardModules.js";
+export const sounds = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+export const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
 
 export class Sound {
   constructor(soundSymbol, octave) {
