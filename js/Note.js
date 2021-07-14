@@ -2,6 +2,8 @@ import { createDomElement } from "./utils.js";
 
 export class Note{
   constructor(sound) {
+    if(!sound)
+      console.trace(sound);
     this.sound = sound;
     this.domElement = null;
 

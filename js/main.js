@@ -1,4 +1,4 @@
-import { Fretboard } from "./fretboardModules.js";
+import { Fretboard } from "./Fretboard.js";
 import { Sound, sounds } from "./Sound.js";
 
 const container = document.getElementById('fretboard');
@@ -15,14 +15,27 @@ const fretboardInstance = new Fretboard({
       new Sound('E', 2)
     ],
     allowTuningChange: true,
+    // evt - event...
+    // lane - StringLane instance
+    onTuningChangeEvt: (evt, lane) => {
+        fretboardInstance.clearAllFrets()
+          .addSoundMarksOnStrings();
+    },
     allowOctaveChange: true,
+    // evt - event...
+    // lane - StringLane instance
+    onOctaveChangeEvt: (evt, lane) => {
+        fretboardInstance.clearAllFrets()
+          .addSoundMarksOnStrings();
+    },
     octaveRange: { min: 1, max: 9 },
     // tuning - Sound instance with value of string
     // fretSound - Sound instance with value of sound on a specific clicked fret
     // marked - is the fret currently marked or not (Boolean)
     // evt - event...
     fretsClick: (tuning, fretSound, marked, evt) => {
-      fretboardInstance.switchCurrentSound(sounds.indexOf(fretSound.sound))
+      fretboardInstance.switchSoundOnOff(fretSound.sound)
+      //fretboardInstance.switchCurrentSound(sounds.indexOf(fretSound.sound))
         .addSoundMarksOnStrings();
     }
   })
@@ -58,5 +71,3 @@ fretboardInstance.addSoundMarksOnString(newString3)
   .removeStringByIndex(fretboardInstance.tuning.length - 2);
 
 fretboardInstance.removeFretboard().create().addSoundMarksOnStrings();
-
-

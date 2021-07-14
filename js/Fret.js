@@ -5,7 +5,8 @@ export class Fret{
   constructor(callback) {
     this.domElement = null;
     this.mark = null;
-    this.callback = (mark) => {
+    this.callback = () => {
+      const mark = !!this.mark;
       return (evt) => {
         evt.stopPropagation();
 
@@ -30,9 +31,12 @@ export class Fret{
   }
 
   noteMark(note) {
+    if(this.mark)
+      return;
+
     this.mark = note;
     this.domElement.appendChild(this.mark.domElement);
-    this.mark.domElement.addEventListener('click', this.callback(true));
+    this.mark.domElement.addEventListener('click', this.callback());
     return this;
   }
 

@@ -4,16 +4,29 @@ import { Fret } from "./Fret.js";
 import { Note } from "./Note.js";
 
 export class StringLane {
-  constructor(frets, tuning, tuningChange, octaveRange, octaveChange, callback) {
+  constructor(obj) {
+    const {
+      frets,
+      tuning,
+      tuningChange,
+      octaveRange,
+      octaveChange,
+      onTuningChangeEvt,
+      onOctaveChangeEvt,
+      callback
+    } = obj;
+
     this.id = uuidv4(); // StringLane has an id in case of two strings with the same sound and octave in 1 fretboard
     this.frets = frets;
     this.tuning = tuning;
     this.tuningElement = null;
     this.lane = null;
     this.tuningChange = tuningChange;
+    this.onTuningChangeEvt = onTuningChangeEvt;
     this.fretInstances = [];
     this.octaveRange = octaveRange;
     this.octaveChange = octaveChange;
+    this.onOctaveChangeEvt = onOctaveChangeEvt;
     this.callback = callback;
 
     return this;
@@ -25,11 +38,25 @@ export class StringLane {
 
     this.tuningElement = this.tuningChange ? optionSelect(this.tuning.sound, [], sounds, opt => sounds.indexOf(opt)) :
       createDomElement('div', ['col', 'bg-success', 'fixed_tuning'], this.tuning.sound);
+
+    if(this.tuningChange)
+      this.tuningElement.addEventListener('change', (evt) => {
+        this.tuning = this.currentTuningValue();
+        return this.onTuningChangeEvt(evt, this);
+      });
+
     this.lane.appendChild(this.tuningElement);
     this.tuningElement.addEventListener('change', this.updateTuning);
 
     this.octaveElement = this.octaveChange ? optionSelect(this.tuning.octave, [], this.octaveRange, opt => opt) :
       createDomElement('div', ['col', 'bg-info', 'fixed_octave'], this.tuning.octave);
+
+    if(this.octaveChange)
+      this.octaveElement.addEventListener('change', (evt) => {
+        this.tuning = this.currentTuningValue();
+        this.onOctaveChangeEvt(evt, this);
+      });
+
     this.lane.appendChild(this.octaveElement);
 
     // +1 because of displaying empty string as fret as well
@@ -39,6 +66,13 @@ export class StringLane {
       this.fretInstances.push(new Fret(this.callback).create(this.lane));
 
     return this;
+  }
+
+  currentTuningValue() {
+    const note = sounds[this.tuningElement.value] ?? this.tuningElement.innerText;
+    const octave = this.octaveElement.value ?? this.octaveElement.innerText;
+
+    return new Sound(note, octave);
   }
 
   updateTuning(evt) {
