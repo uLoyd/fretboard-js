@@ -22,7 +22,11 @@ export class Fretboard {
       onTuningChangeEvt,
       onOctaveChangeEvt,
       fretsClick,
-      octaveRange
+      octaveRange,
+      stringLaneElemClasses,
+      fretElemClasses,
+      noteElemClasses,
+      emptyStringClasses
     } = obj;
 
     this.frets = frets;
@@ -40,6 +44,11 @@ export class Fretboard {
     this.octaveRange = [4]; // 4 is just a random placeholder. If nothing would be passed
                             // here it'd be the only possible option for every "string" to
                             // be in 4th octave indefinitely
+
+    this.stringLaneElemClasses = stringLaneElemClasses;
+    this.fretElemClasses = fretElemClasses;
+    this.noteElemClasses = noteElemClasses;
+    this.emptyStringClasses = emptyStringClasses;
 
     if (octaveRange) {
       this.octaveRange.pop(); // Throws out the default value
@@ -63,7 +72,20 @@ export class Fretboard {
     if (addToTuning)
       this.tuning.push(sound);
 
-    const { frets, allowTuningChange, octaveRange, allowOctaveChange, onTuningChangeEvt, onOctaveChangeEvt, fretsClick } = this;
+    const {
+      frets,
+      allowTuningChange,
+      octaveRange,
+      allowOctaveChange,
+      onTuningChangeEvt,
+      onOctaveChangeEvt,
+      fretsClick,
+      stringLaneElemClasses,
+      fretElemClasses,
+      noteElemClasses,
+      emptyStringClasses
+    } = this;
+
     const lane = new StringLane({
         frets,
         tuning: sound,
@@ -72,9 +94,12 @@ export class Fretboard {
         octaveChange: allowOctaveChange,
         onTuningChangeEvt,
         onOctaveChangeEvt,
-        callback: fretsClick
-    }
-    );
+        callback: fretsClick,
+        cssClasses: stringLaneElemClasses ?? {},
+        fretElemClasses,
+        noteElemClasses,
+        emptyStringClasses
+    });
 
     if (create)
       lane.create(this.domElement);

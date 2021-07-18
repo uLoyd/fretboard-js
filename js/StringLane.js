@@ -13,6 +13,10 @@ export class StringLane {
       octaveChange,
       onTuningChangeEvt,
       onOctaveChangeEvt,
+      cssClasses,
+      fretElemClasses,
+      noteElemClasses,
+      emptyStringClasses,
       callback
     } = obj;
 
@@ -29,15 +33,28 @@ export class StringLane {
     this.onOctaveChangeEvt = onOctaveChangeEvt;
     this.callback = callback;
 
+    this.elemClasses = {
+      lane: cssClasses.lane ?? ['row', 'bg-dark', 'fret_lane'],
+      option: cssClasses.option ?? [],
+      tuningFixed: cssClasses.tuningFixed ?? ['col', 'bg-success', 'fixed_tuning'],
+      octaveFixed: cssClasses.octaveFixed ?? ['col', 'bg-info', 'fixed_octave']
+    }
+
+    this.fretElemClasses = fretElemClasses;
+    this.noteElemClasses = noteElemClasses;
+    this.emptyStringClasses = emptyStringClasses;
+
     return this;
   }
 
   create(target) {
-    this.lane = createDomElement('div', ['row', 'bg-dark', 'fret_lane']);
+    const { lane, option, tuningFixed, octaveFixed } = this.elemClasses;
+
+    this.lane = createDomElement('div', lane);
     target.appendChild(this.lane);
 
-    this.tuningElement = this.tuningChange ? optionSelect(this.tuning.sound, [], sounds, opt => sounds.indexOf(opt)) :
-      createDomElement('div', ['col', 'bg-success', 'fixed_tuning'], this.tuning.sound);
+    this.tuningElement = this.tuningChange ? optionSelect(this.tuning.sound, option, sounds, opt => sounds.indexOf(opt)) :
+      createDomElement('div', tuningFixed, this.tuning.sound);
 
     if(this.tuningChange)
       this.tuningElement.addEventListener('change', (evt) => {
@@ -48,8 +65,8 @@ export class StringLane {
     this.lane.appendChild(this.tuningElement);
     this.tuningElement.addEventListener('change', this.updateTuning);
 
-    this.octaveElement = this.octaveChange ? optionSelect(this.tuning.octave, [], this.octaveRange, opt => opt) :
-      createDomElement('div', ['col', 'bg-info', 'fixed_octave'], this.tuning.octave);
+    this.octaveElement = this.octaveChange ? optionSelect(this.tuning.octave, option, this.octaveRange, opt => opt) :
+      createDomElement('div', octaveFixed, this.tuning.octave);
 
     if(this.octaveChange)
       this.octaveElement.addEventListener('change', (evt) => {
@@ -59,11 +76,10 @@ export class StringLane {
 
     this.lane.appendChild(this.octaveElement);
 
-    // +1 because of displaying empty string as fret as well
-    const fretsDisplay = this.frets + 1;
+    this.fretInstances.push(new Fret(this.callback, this.emptyStringClasses).create(this.lane));
 
-    for(let i = 0; i < fretsDisplay; i++)
-      this.fretInstances.push(new Fret(this.callback).create(this.lane));
+    for(let i = 0; i < this.frets; i++)
+      this.fretInstances.push(new Fret(this.callback, this.fretElemClasses).create(this.lane));
 
     return this;
   }
@@ -108,7 +124,7 @@ export class StringLane {
       const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
       const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
       const sound = new Sound(note, octave); // Creates new sound
-      const mark = new Note(sound).create();
+      const mark = new Note(sound, this.noteElemClasses).create();
       this.fretInstances[place].noteMark(mark);
     });
 
@@ -119,7 +135,7 @@ export class StringLane {
     const place = this.findSoundOctavePlace(sound);
 
     if(place >= 0 && place <= this.frets)
-      this.fretInstances[place].noteMark(new Note(sound).create());
+      this.fretInstances[place].noteMark(new Note(sound, this.noteElemClasses).create());
 
     return this;
   }

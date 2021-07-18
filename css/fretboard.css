@@ -48,11 +48,14 @@
 
 .fret_place {
   cursor: pointer;
-  /*min-height: 4.5vh;
-  border-top: 0.5px solid black;*/
   border-bottom: 0.5px solid black;
   background-image: url("../img/fret.png");
   background-size: cover;
+}
+
+.empty_string {
+  background-color: #363636;
+  border-bottom: 0.5px solid black;
 }
 
 .fret_mark{

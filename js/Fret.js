@@ -2,9 +2,10 @@ import { Sound, sounds } from "./Sound.js";
 import { createDomElement } from "./utils.js";
 
 export class Fret{
-  constructor(callback) {
+  constructor(callback, classes) {
     this.domElement = null;
     this.mark = null;
+    this.classes = classes ?? ['col', 'fret_place', 'd-flex', 'justify-content-center'];
     this.callback = () => {
       const mark = !!this.mark;
       return (evt) => {
@@ -23,7 +24,7 @@ export class Fret{
   }
 
   create(target) {
-    this.domElement = createDomElement('div', ['col', 'fret_place', 'd-flex', 'justify-content-center']);
+    this.domElement = createDomElement('div', this.classes);
     this.domElement.addEventListener('click', this.callback());
     target.appendChild(this.domElement);
 

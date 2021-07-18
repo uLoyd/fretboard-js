@@ -8,10 +8,10 @@ const fretboardInstance = new Fretboard({
     frets: 12,
     tuning: [
       new Sound('E', 4),
+      new Sound('B', 3),
       new Sound('G', 3),
       new Sound('D', 3),
       new Sound('A', 2),
-      new Sound('B', 3),
       new Sound('E', 2)
     ],
     allowTuningChange: true,
@@ -35,9 +35,9 @@ const fretboardInstance = new Fretboard({
     // evt - event...
     fretsClick: (tuning, fretSound, marked, evt) => {
       fretboardInstance.switchSoundOnOff(fretSound.sound)
-      //fretboardInstance.switchCurrentSound(sounds.indexOf(fretSound.sound))
         .addSoundMarksOnStrings();
-    }
+    },
+    emptyStringClasses: ['col', 'd-flex', 'justify-content-center', 'empty_string']
   })
   .create()
   .addCurrentSound(0)
@@ -46,28 +46,14 @@ const fretboardInstance = new Fretboard({
   .addCurrentExactSound(new Sound('F#', 3))
   .addSoundMarksOnStrings();
 
-const newString1 = fretboardInstance.addString(
-  new Sound('G', 1),
-  true,
-  true
-);
+const addStringButton = document.getElementById('addStringButton');
+addStringButton.addEventListener('click', () => {
+  const newString = fretboardInstance.addString(new Sound('A', 1));
+  fretboardInstance.addSoundMarksOnString(newString);
+});
 
-const newString2 = fretboardInstance.addString(
-  new Sound('G', 8),
-  true,
-  true
-);
-
-fretboardInstance.addSoundMarksOnString(newString2);
-
-const newString3 = fretboardInstance.addString(
-  new Sound('F', 1),
-  true,
-  true
-);
-
-fretboardInstance.addSoundMarksOnString(newString3)
-  .removeString(newString1)
-  .removeStringByIndex(fretboardInstance.tuning.length - 2);
-
-fretboardInstance.removeFretboard().create().addSoundMarksOnStrings();
+const removeStringButton = document.getElementById('removeStringButton');
+removeStringButton.addEventListener('click', () => {
+  const index = fretboardInstance.stringInstances.length - 1;
+  fretboardInstance.removeStringByIndex(index);
+});
