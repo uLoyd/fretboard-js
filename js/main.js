@@ -17,29 +17,28 @@ const fretboardInstance = new Fretboard({
     allowTuningChange: true,
     // evt - event...
     // lane - StringLane instance
-    onTuningChangeEvt: (evt, lane) => {
-        fretboardInstance.clearAllFrets()
-          .addSoundMarksOnStrings();
-    },
+    onTuningChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
     allowOctaveChange: true,
     // evt - event...
     // lane - StringLane instance
-    onOctaveChangeEvt: (evt, lane) => {
-        fretboardInstance.clearAllFrets()
-          .addSoundMarksOnStrings();
-    },
+    onOctaveChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
     octaveRange: { min: 1, max: 9 },
     // tuning - Sound instance with value of string
     // fretSound - Sound instance with value of sound on a specific clicked fret
     // marked - is the fret currently marked or not (Boolean)
     // evt - event...
     fretsClick: (tuning, fretSound, marked, evt) => {
-      fretboardInstance.switchSoundOnOff(fretSound.sound)
-        .addSoundMarksOnStrings();
+      const soundIndex = sounds.indexOf(fretSound.sound);
+      if(marked)
+        fretboardInstance.removeCurrentSound(soundIndex)
+          .addSoundMarksOnStrings();
+      else
+        fretboardInstance.addCurrentSound(soundIndex)
+          .addSoundMarksOnStrings();
     },
     emptyStringClasses: ['col', 'd-flex', 'justify-content-center', 'empty_string']
   })
-  .create()
+  .create([0, 3, 5, 7, 9, 12])
   .addCurrentSound(0)
   .addCurrentSound(3)
   .addCurrentExactSound(new Sound('B', 4))

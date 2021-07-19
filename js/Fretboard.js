@@ -1,5 +1,6 @@
-import { sounds } from "./Sound.js";
+import {Sound, sounds} from "./Sound.js";
 import { StringLane } from "./StringLane.js";
+import { createDomElement } from "./utils.js";
 
 export const buttonSoundClick = (fretboardInstance) => {
     return (evt) => {
@@ -60,8 +61,30 @@ export class Fretboard {
     return this;
   }
 
-  create() {
+  create(marks) {
+    this.fretboardElement = createDomElement('div');
+    this.domElement.appendChild(this.fretboardElement);
+
     this.tuning.forEach(sound => this.addString(sound));
+
+    if(!marks)
+      return this;
+
+    // lane used for representing fret numbers
+    const lane = new StringLane({
+      frets: 12,
+      tuningChange: this.allowTuningChange,
+      octaveChange: this.allowOctaveChange,
+      tuning: new Sound(null, null),
+      octaveRange: [1],
+      fretElemClasses: ['col', 'd-flex', 'justify-content-center'],
+      emptyStringClasses: ['col', 'd-flex', 'justify-content-center']
+    });
+    lane.create(this.domElement);
+    lane.tuningElement.style.visibility = 'hidden';
+    lane.octaveElement.style.visibility = 'hidden';
+
+    marks.forEach(mark => lane.fretInstances[mark].domElement.innerText = mark);
 
     return this;
   }
@@ -102,7 +125,7 @@ export class Fretboard {
     });
 
     if (create)
-      lane.create(this.domElement);
+      lane.create(this.fretboardElement);
 
     this.stringInstances.push(lane);
 
@@ -142,32 +165,18 @@ export class Fretboard {
   removeStringByIndex = (index, removeDom = true, removeFromTuning = true) =>
     this.removeString(this.stringInstances[index], removeDom, removeFromTuning);
 
-  // checkButtons is optional (dom element containing 12 buttons from A to G#).
-  // If passed it will mark buttons related to currently displayed sounds from the scale
-  /*updateScaleToTonic(newTonic) {
-    this.currentSounds = this.currentScale.shiftToTonic(sounds.indexOf(newTonic));
-    this.addSoundMarksOnStrings();
-  }*/
-
-  /*showScale(libInstance) {
-    return (evt) => {
-      const scaleTonicSelect = document.getElementById('scaleTon').value;
-      this.currentScale = libInstance.findById(evt.target.value);
-      this.currentSounds = this.currentScale.shiftToTonic(sounds.indexOf(scaleTonicSelect));
-      this.addSoundMarksOnStrings();
-    }
-  }*/
-
-  addCurrentSound(soundIndex) {
+  changeCurrentSound(soundIndex, value) {
     this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
-    this.currentSounds[soundIndex] = true;
+    this.currentSounds[soundIndex] = value;
     return this;
   }
 
+  addCurrentSound(soundIndex) {
+    return this.changeCurrentSound(soundIndex, true);
+  }
+
   removeCurrentSound(soundIndex) {
-    this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
-    this.currentSounds[soundIndex] = false;
-    return this;
+    return this.changeCurrentSound(soundIndex, false);
   }
 
   switchCurrentSound(soundIndex) {

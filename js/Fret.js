@@ -3,6 +3,7 @@ import { createDomElement } from "./utils.js";
 
 export class Fret{
   constructor(callback, classes) {
+    callback = callback ?? function(){};
     this.domElement = null;
     this.mark = null;
     this.classes = classes ?? ['col', 'fret_place', 'd-flex', 'justify-content-center'];

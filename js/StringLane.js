@@ -34,10 +34,10 @@ export class StringLane {
     this.callback = callback;
 
     this.elemClasses = {
-      lane: cssClasses.lane ?? ['row', 'bg-dark', 'fret_lane'],
-      option: cssClasses.option ?? [],
-      tuningFixed: cssClasses.tuningFixed ?? ['col', 'bg-success', 'fixed_tuning'],
-      octaveFixed: cssClasses.octaveFixed ?? ['col', 'bg-info', 'fixed_octave']
+      lane: cssClasses?.lane ?? ['row', 'bg-dark', 'fret_lane'],
+      option: cssClasses?.option ?? [],
+      tuningFixed: cssClasses?.tuningFixed ?? ['col', 'bg-success', 'fixed_tuning'],
+      octaveFixed: cssClasses?.octaveFixed ?? ['col', 'bg-info', 'fixed_octave']
     }
 
     this.fretElemClasses = fretElemClasses;
