@@ -27,13 +27,14 @@ export class Fretboard {
       stringLaneElemClasses,
       fretElemClasses,
       noteElemClasses,
-      emptyStringClasses
+      emptyStringClasses,
+      namingConvention
     } = obj;
 
     this.frets = frets;
     this.stringInstances = [];
     this.domElement = container;
-    this.currentScale = null;
+    //this.currentScale = null;
     this.currentSounds = new Array(12).fill(false); // Meant for sounds in all octaves
     this.currentExactSounds = []; // Meant for Sound instances as those specify the exact octave
     this.tuning = tuning;
@@ -50,6 +51,7 @@ export class Fretboard {
     this.fretElemClasses = fretElemClasses;
     this.noteElemClasses = noteElemClasses;
     this.emptyStringClasses = emptyStringClasses;
+    this.namingConvention = namingConvention;
 
     if (octaveRange) {
       this.octaveRange.pop(); // Throws out the default value
@@ -255,10 +257,10 @@ export class Fretboard {
 
     this.currentSounds.forEach((sound, index) => {
       if (sound)
-        string.markSound(index);
+        string.markSound(index, this.namingConvention);
     });
 
-    this.currentExactSounds.forEach(sound => string.markExactSound(sound));
+    this.currentExactSounds.forEach(sound => string.markExactSound(sound, this.namingConvention));
 
     return this;
   }
@@ -278,9 +280,22 @@ export class Fretboard {
 
     this.stringInstances.forEach(string =>
       this.currentSounds[index] ?
-        string.markSound(index) :
+        string.markSound(index, this.namingConvention) :
         string.removeMark(index)
     );
+
+    return this;
+  }
+
+  changeNamingConvention(convention, reload = true) {
+    if(this.namingConvention === convention)
+      return this;
+
+    this.namingConvention = convention;
+
+    if(reload)
+      this.clearAllFrets()
+        .addSoundMarksOnStrings();
 
     return this;
   }

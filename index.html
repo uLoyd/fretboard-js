@@ -21,8 +21,14 @@
   <p>Hello world! This is HTML5 Boilerplate.</p>
   <div class="container-fluid">
     <div id="fretboard"></div>
-    <button class="btn btn-success mt-2 float-left" id="addStringButton">+</button>
-    <button class="btn btn-danger mt-2 float-left" id="removeStringButton">-&nbsp</button>
+    <div class="row">
+      <button class="btn btn-success mt-2 col" id="addStringButton">Add string</button>
+      <button class="btn btn-danger mt-2 col" id="removeStringButton">Remove string</button>
+      <button class="btn btn-info mt-2 col" id="noteSharp">Show sharp notes</button>
+      <button class="btn btn-info mt-2 col" id="noteFlat">Show flat notes</button>
+      <button class="btn btn-info mt-2 col" id="noteFrequency">Show note frequencies</button>
+    </div>
+
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="js/vendor/modernizr-3.11.2.min.js"></script>

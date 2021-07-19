@@ -1,10 +1,11 @@
 import { createDomElement } from "./utils.js";
 
 export class Note{
-  constructor(sound, classes) {
+  constructor(sound, classes, namingConvention) {
     this.sound = sound;
     this.domElement = null;
     this.classes = classes ?? ['rounded', 'col', 'p-1', 'fret_mark'];
+    this.namingConvention = namingConvention ?? function () { return this.sound.toString() };
     return this;
   }
 
@@ -16,7 +17,7 @@ export class Note{
     this.domElement = createDomElement(
       'div',
       this.classes.concat([colorClass]),
-      this.sound.toString()
+      this.namingConvention(this.sound)
     );
 
     return this;

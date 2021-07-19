@@ -45,6 +45,8 @@ const fretboardInstance = new Fretboard({
   .addCurrentExactSound(new Sound('F#', 3))
   .addSoundMarksOnStrings();
 
+
+
 const addStringButton = document.getElementById('addStringButton');
 addStringButton.addEventListener('click', () => {
   const newString = fretboardInstance.addString(new Sound('A', 1));
@@ -56,3 +58,16 @@ removeStringButton.addEventListener('click', () => {
   const index = fretboardInstance.stringInstances.length - 1;
   fretboardInstance.removeStringByIndex(index);
 });
+
+const noteSharp = document.getElementById('noteSharp');
+noteSharp.addEventListener('click', () => fretboardInstance.changeNamingConvention(sound =>
+  sound.sound + sound.octave));
+
+const noteFlat = document.getElementById('noteFlat');
+noteFlat.addEventListener('click', () => fretboardInstance.changeNamingConvention((sound) =>
+  (sound.flatNote ?? sound.sound) + (sound.flatOctave ?? sound.octave)
+));
+
+const noteFrequency = document.getElementById('noteFrequency');
+noteFrequency.addEventListener('click', () => fretboardInstance.changeNamingConvention(sound =>
+  `${ sound.getFrequencyFromDistance().toFixed(0) }Hz`));

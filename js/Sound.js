@@ -1,10 +1,28 @@
 export const sounds = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
+export const flats =  [null, 'Bb', 'Cb', null, 'Db', null, 'Eb', 'Fb', null, 'Gb', null, 'Ab'];
 export const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
 
 export class Sound {
   constructor(soundSymbol, octave) {
+    const index = sounds.indexOf(soundSymbol);
     this.sound = soundSymbol;
     this.octave = octave;
+    this.flatNote = flats[index] ?? null;
+    this.flatOctave = this.flatNote ? this.flatNote === 'Cb' ? this.octave + 1 : this.octave : null;
+  }
+
+  static frequencyConstructor(frequency) {
+    const dist = Sound.getDistanceFromFrequency(frequency);
+    const note = Sound.getNoteFromDistance(dist);
+    const octave = Sound.getOctaveFromDistance(dist);
+
+    return new Sound(note, octave);
+  }
+
+  static getDistanceFromFrequency(fx) {
+    const result = Math.log(fx / A4) / Math.pow(2, 1 / 12);
+
+    return Math.round(result);
   }
 
   // Distance relative to A4 (arguments defaults to "this" object)

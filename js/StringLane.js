@@ -116,7 +116,7 @@ export class StringLane {
   findSoundOctavePlace = sound => this.tuning.distanceBetweenNotes(sound);
 
   // Marks ALL SOUNDS regardless of their octave
-  markSound(soundIndex) {
+  markSound(soundIndex, namingConvention) {
     const places = this.findSoundPlace(soundIndex);
 
     places.forEach(place => {
@@ -124,18 +124,18 @@ export class StringLane {
       const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
       const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
       const sound = new Sound(note, octave); // Creates new sound
-      const mark = new Note(sound, this.noteElemClasses).create();
+      const mark = new Note(sound, this.noteElemClasses, namingConvention).create();
       this.fretInstances[place].noteMark(mark);
     });
 
     return this;
   }
 
-  markExactSound(sound) {
+  markExactSound(sound, namingConvention) {
     const place = this.findSoundOctavePlace(sound);
 
     if(place >= 0 && place <= this.frets)
-      this.fretInstances[place].noteMark(new Note(sound, this.noteElemClasses).create());
+      this.fretInstances[place].noteMark(new Note(sound, this.noteElemClasses, namingConvention).create());
 
     return this;
   }
