@@ -1,10 +1,10 @@
 import { Fretboard } from "./Fretboard.js";
 import { Sound, sounds } from "./Sound.js";
-
+import { Tuning } from "./Tuning.js";
 const container = document.getElementById('fretboard');
 
 const fretboardInstance = new Fretboard({
-    container: container,
+    container,
     frets: 12,
     tuning: [
       new Sound('E', 4),
@@ -14,11 +14,9 @@ const fretboardInstance = new Fretboard({
       new Sound('A', 2),
       new Sound('E', 2)
     ],
-    allowTuningChange: true,
     // evt - event...
     // lane - StringLane instance
     onTuningChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
-    allowOctaveChange: true,
     // evt - event...
     // lane - StringLane instance
     onOctaveChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
@@ -45,8 +43,6 @@ const fretboardInstance = new Fretboard({
   .addCurrentExactSound(new Sound('F#', 3))
   .addSoundMarksOnStrings();
 
-
-
 const addStringButton = document.getElementById('addStringButton');
 addStringButton.addEventListener('click', () => {
   const newString = fretboardInstance.addString(new Sound('A', 1));
@@ -71,3 +67,40 @@ noteFlat.addEventListener('click', () => fretboardInstance.changeNamingConventio
 const noteFrequency = document.getElementById('noteFrequency');
 noteFrequency.addEventListener('click', () => fretboardInstance.changeNamingConvention(sound =>
   `${ sound.getFrequencyFromDistance().toFixed(0) }Hz`));
+
+const standardTuning = new Tuning([
+  new Sound('E', 4),
+  new Sound('B', 3),
+  new Sound('G', 3),
+  new Sound('D', 3),
+  new Sound('A', 2),
+  new Sound('E', 2)
+]);
+
+const dropTuning = new Tuning([
+  new Sound('E', 4),
+  new Sound('B', 3),
+  new Sound('G', 3),
+  new Sound('D', 3),
+  new Sound('A', 2),
+  new Sound('D', 2)
+]);
+
+const doubleDropTuning = new Tuning([
+  new Sound('B', 3),
+  new Sound('G#', 3),
+  new Sound('E', 3),
+  new Sound('B', 2),
+  new Sound('F#', 2),
+  new Sound('B', 1)
+]);
+
+console.assert(standardTuning.isStandard() === true);
+console.assert(standardTuning.isDrop() === false);
+console.assert(standardTuning.isDoubleDrop() === false);
+console.assert(dropTuning.isStandard() === false);
+console.assert(dropTuning.isDrop() === true);
+console.assert(dropTuning.isDoubleDrop() === false);
+console.assert(doubleDropTuning.isStandard() === false);
+console.assert(doubleDropTuning.isDrop() === false);
+console.assert(doubleDropTuning.isDoubleDrop() === true);

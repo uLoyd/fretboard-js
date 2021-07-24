@@ -1,5 +1,6 @@
-import {Sound, sounds} from "./Sound.js";
+import { Sound, sounds } from "./Sound.js";
 import { StringLane } from "./StringLane.js";
+import { Tuning } from "./Tuning.js";
 import { createDomElement } from "./utils.js";
 
 export const buttonSoundClick = (fretboardInstance) => {
@@ -37,7 +38,7 @@ export class Fretboard {
     //this.currentScale = null;
     this.currentSounds = new Array(12).fill(false); // Meant for sounds in all octaves
     this.currentExactSounds = []; // Meant for Sound instances as those specify the exact octave
-    this.tuning = tuning;
+    this.tuning = new Tuning(tuning);
     this.allowTuningChange = !!onTuningChangeEvt;
     this.onTuningChangeEvt = onTuningChangeEvt ?? function () {}; // just an empty function to replace missing callback
     this.allowOctaveChange = !!onOctaveChangeEvt;
@@ -67,7 +68,7 @@ export class Fretboard {
     this.fretboardElement = createDomElement('div');
     this.domElement.appendChild(this.fretboardElement);
 
-    this.tuning.forEach(sound => this.addString(sound));
+    this.tuning.sounds.forEach(sound => this.addString(sound));
 
     if(!marks)
       return this;
@@ -95,7 +96,7 @@ export class Fretboard {
   // Returns stringLane instance
   addString(sound, create = true, addToTuning = false) {
     if (addToTuning)
-      this.tuning.push(sound);
+      this.tuning.sounds.push(sound);
 
     const {
       frets,
@@ -158,7 +159,7 @@ export class Fretboard {
     this.stringInstances.splice(index, 1);
 
     if (removeFromTuning)
-      this.tuning.splice(index, 1);
+      this.tuning.sounds.splice(index, 1);
 
     return this;
   }
@@ -167,18 +168,18 @@ export class Fretboard {
   removeStringByIndex = (index, removeDom = true, removeFromTuning = true) =>
     this.removeString(this.stringInstances[index], removeDom, removeFromTuning);
 
-  changeCurrentSound(soundIndex, value) {
+  #changeCurrentSound(soundIndex, value) {
     this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
     this.currentSounds[soundIndex] = value;
     return this;
   }
 
   addCurrentSound(soundIndex) {
-    return this.changeCurrentSound(soundIndex, true);
+    return this.#changeCurrentSound(soundIndex, true);
   }
 
   removeCurrentSound(soundIndex) {
-    return this.changeCurrentSound(soundIndex, false);
+    return this.#changeCurrentSound(soundIndex, false);
   }
 
   switchCurrentSound(soundIndex) {
@@ -228,7 +229,10 @@ export class Fretboard {
       this.addCurrentExactSound(sound);
   }
 
-  addExactSoundMarksOnStrings(sound) {
+  addExactSoundMarksOnStrings(sound, addToCurrent = true) {
+    if(addToCurrent)
+      this.addCurrentExactSound(sound);
+
     this.stringInstances.forEach((string) => {
       string.findSoundOctavePlace(sound);
     });
@@ -298,6 +302,10 @@ export class Fretboard {
         .addSoundMarksOnStrings();
 
     return this;
+  }
+
+  getStringLanesTuning() {
+    return new Tuning(this.stringInstances.map(lane => lane.currentTuningValue()));
   }
 
   clearAllFrets() {

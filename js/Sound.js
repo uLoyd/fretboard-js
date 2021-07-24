@@ -6,7 +6,7 @@ export class Sound {
   constructor(soundSymbol, octave) {
     const index = sounds.indexOf(soundSymbol);
     this.sound = soundSymbol;
-    this.octave = octave;
+    this.octave = parseFloat(octave);
     this.flatNote = flats[index] ?? null;
     this.flatOctave = this.flatNote ? this.flatNote === 'Cb' ? this.octave + 1 : this.octave : null;
   }
@@ -75,6 +75,16 @@ export class Sound {
     const dist2 = this.getDistanceFromNote(sound2.sound, sound2.octave);
 
     return dist1 - dist2;
+  }
+
+  // compares sounds without octaves
+  soundDistanceForward(sound1 = new Sound('A', 4), sound2 = this) {
+    const id1 = sounds.indexOf(sound1.sound);
+    const id2 = sounds.indexOf(sound2.sound);
+
+    const res = id1 - id2;
+
+    return res < 0 ? 12 + res : res;
   }
 
   toString = () => `${this.sound}${this.octave}`;
