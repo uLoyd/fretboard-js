@@ -1,4 +1,4 @@
-import { createDomElement } from "./utils.js";
+import { createDomElement, uuidv4 } from "./utils.js";
 
 export class ScaleLib{
   constructor(scales) {
@@ -11,7 +11,7 @@ export class ScaleLib{
   }
 
   createAllScaleElements(target){
-    this.scales.forEach(scale => scale.createDomElement(target));
+    this.scales.forEach(scale => scale.create(target));
 
     return this;
   }
@@ -23,7 +23,7 @@ export class ScaleLib{
 
 export class Scale{
   constructor(data) {
-    this.id = data['Scale.id'] ?? data.id;
+    this.id = data['Scale.id'] ?? data.id ?? uuidv4();
 
     this.sounds = data['Scale.sounds'] ?
       data['Scale.sounds'].split('').map(x => x === '1') :
@@ -35,7 +35,7 @@ export class Scale{
     return this;
   }
 
-  createDomElement(target) {
+  create(target) {
     const elem = createDomElement('option', null, this.name);
     elem.value = this.id;
     target.appendChild(elem);
@@ -43,6 +43,7 @@ export class Scale{
     return elem;
   }
 
+  // Returns array of sounds in current scale shifted to specific tonic
   shiftToTonic(targetTonic) {
     const diff = this.tonic - targetTonic;
     const arrCopy = [...this.sounds];
@@ -51,6 +52,16 @@ export class Scale{
       return arrCopy;
 
     return arrCopy.splice(diff, arrCopy.length - diff).concat(arrCopy);
+  }
+
+  // Same as "shiftToTonic" but returns new Scale instance
+  shiftScaleToTonic(targetTonic) {
+    return new Scale({
+      id: null,
+      sounds: this.shiftToTonic(targetTonic),
+      name: this.name,
+      tonic: targetTonic
+    });
   }
 
   async saveNewScale(url) {
@@ -70,6 +81,6 @@ export class Scale{
     const response = await rawResponse;
     const jsonResponse = await response.json();
 
-    return { response: response, json: jsonResponse }
+    return { response, jsonResponse }
   }
 }

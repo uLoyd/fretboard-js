@@ -112,6 +112,14 @@ export class StringLane {
     return places;
   }
 
+  getFretsWithSound(soundIndex) {
+    return this.findSoundPlace(soundIndex).map(place => this.fretInstances[place]);
+  }
+
+  getFretsWithExactSound(sound) {
+    return this.fretInstances[this.findSoundOctavePlace(sound)];
+  }
+
   // Sound's supposed to be Sound instance
   findSoundOctavePlace = sound => this.tuning.distanceBetweenNotes(sound);
 

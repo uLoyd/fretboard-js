@@ -1,19 +1,8 @@
 import { Sound, sounds } from "./Sound.js";
 import { StringLane } from "./StringLane.js";
 import { Tuning } from "./Tuning.js";
+import { SoundStorage } from "./SoundStorage.js";
 import { createDomElement } from "./utils.js";
-
-export const buttonSoundClick = (fretboardInstance) => {
-    return (evt) => {
-        const classOn = 'btn-danger';
-        const classOff = 'btn-primary';
-
-        fretboardInstance.switchSoundOnOff(evt.target.value);
-
-        evt.target.classList.toggle(classOn);
-        evt.target.classList.toggle(classOff);
-    }
-}
 
 export class Fretboard {
   constructor(obj) {
@@ -36,8 +25,25 @@ export class Fretboard {
     this.stringInstances = [];
     this.domElement = container;
     //this.currentScale = null;
-    this.currentSounds = new Array(12).fill(false); // Meant for sounds in all octaves
-    this.currentExactSounds = []; // Meant for Sound instances as those specify the exact octave
+    //this.currentSounds = new Array(12).fill(false);
+
+    this.currentSounds = new SoundStorage(
+      (sound, value, id) => id === sound,
+      (sound, sounds) => {
+        sounds[sound] = true;
+        return sounds;
+      },
+      (index, sounds) => {
+        sounds[index] = false;
+        return sounds;
+      }
+    ); // Meant for sounds in all octaves
+    this.currentSounds.sounds = new Array(12).fill(false); // setting up the sounds array of SoundStorage
+
+    //this.currentExactSounds = []; // Meant for Sound instances as those specify the exact octave
+    this.currentExactSounds = new SoundStorage((sound, value) =>
+      sound.toString() === value.toString()); // Meant for Sound instances as those specify the exact octave
+
     this.tuning = new Tuning(tuning);
     this.allowTuningChange = !!onTuningChangeEvt;
     this.onTuningChangeEvt = onTuningChangeEvt ?? function () {}; // just an empty function to replace missing callback
@@ -75,13 +81,13 @@ export class Fretboard {
 
     // lane used for representing fret numbers
     const lane = new StringLane({
-      frets: 12,
+      frets: this.frets,
       tuningChange: this.allowTuningChange,
       octaveChange: this.allowOctaveChange,
       tuning: new Sound(null, null),
       octaveRange: [1],
       fretElemClasses: ['col', 'd-flex', 'justify-content-center'],
-      emptyStringClasses: ['col', 'd-flex', 'justify-content-center']
+      emptyStringClasses: this.emptyStringClasses ?? ['col', 'd-flex', 'justify-content-center']
     });
     lane.create(this.domElement);
     lane.tuningElement.style.visibility = 'hidden';
@@ -108,8 +114,7 @@ export class Fretboard {
       fretsClick,
       stringLaneElemClasses,
       fretElemClasses,
-      noteElemClasses,
-      emptyStringClasses
+      noteElemClasses
     } = this;
 
     const lane = new StringLane({
@@ -123,8 +128,7 @@ export class Fretboard {
         callback: fretsClick,
         cssClasses: stringLaneElemClasses ?? {},
         fretElemClasses,
-        noteElemClasses,
-        emptyStringClasses
+        noteElemClasses
     });
 
     if (create)
@@ -168,70 +172,9 @@ export class Fretboard {
   removeStringByIndex = (index, removeDom = true, removeFromTuning = true) =>
     this.removeString(this.stringInstances[index], removeDom, removeFromTuning);
 
-  #changeCurrentSound(soundIndex, value) {
-    this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]).forEach(sound => this.removeCurrentExactSound(sound));
-    this.currentSounds[soundIndex] = value;
-    return this;
-  }
-
-  addCurrentSound(soundIndex) {
-    return this.#changeCurrentSound(soundIndex, true);
-  }
-
-  removeCurrentSound(soundIndex) {
-    return this.#changeCurrentSound(soundIndex, false);
-  }
-
-  switchCurrentSound(soundIndex) {
-    this.currentSounds[soundIndex] ? this.removeCurrentSound(soundIndex) : this.addCurrentSound(soundIndex);
-    return this;
-  }
-
-  findCurrentExactSound = sound => this.currentExactSounds.find(x => x.toString() === sound.toString());
-
-  findCurrentExactSoundIndex = sound => this.currentExactSounds.findIndex(x => x.toString() === sound.toString());
-
-  // Sound's supposed to be Sound instance
-  addCurrentExactSound(sound) {
-    const foundSound = this.findCurrentExactSound(sound);
-
-    if (!foundSound)
-      this.currentExactSounds.push(sound);
-
-    return this;
-  }
-
-  removeCurrentExactSound(sound) {
-    const foundSound = this.findCurrentExactSoundIndex(sound);
-
-    if (foundSound !== -1)
-      this.currentExactSounds.splice(foundSound, 1);
-
-    return this;
-  }
-
-  // Removes "sound" both from general sound array (currentSounds) and exact sound array (currentExactSounds)
-  // based on soundIndex. It will remove ALL instances of sound regardless of octave
-  removeSoundAll(soundIndex) {
-    this.removeCurrentSound(soundIndex);
-
-    const exacts = this.currentExactSounds.filter(x => x.sound === sounds[soundIndex]);
-    exacts.forEach(sound => this.removeCurrentExactSound(sound));
-
-    return this;
-  }
-
-  switchCurrentExactSound(sound) {
-    const foundSound = this.findCurrentExactSound(sound);
-
-    return foundSound ?
-      this.removeCurrentExactSound(sound) :
-      this.addCurrentExactSound(sound);
-  }
-
   addExactSoundMarksOnStrings(sound, addToCurrent = true) {
     if(addToCurrent)
-      this.addCurrentExactSound(sound);
+      this.currentExactSounds.add(sound);
 
     this.stringInstances.forEach((string) => {
       string.findSoundOctavePlace(sound);
@@ -243,6 +186,7 @@ export class Fretboard {
   // Creates "marks" of sounds on corresponding frets. Shows the scale on fretboard in short.
   // Adds sound marks for EVERY sound on ALL strings!
   addSoundMarksOnStrings() {
+    console.log(this.currentExactSounds.sounds);
     this.stringInstances.forEach(string => this.addSoundMarksOnString(string));
 
     return this;
@@ -259,34 +203,12 @@ export class Fretboard {
   addSoundMarksOnString(string) {
     string.clearAllFrets();
 
-    this.currentSounds.forEach((sound, index) => {
+    this.currentSounds.sounds.forEach((sound, index) => {
       if (sound)
         string.markSound(index, this.namingConvention);
     });
 
-    this.currentExactSounds.forEach(sound => string.markExactSound(sound, this.namingConvention));
-
-    return this;
-  }
-
-  // Iterates through strings adding / removing sound.
-  // If sound passed in argument is currently "marked" in current position it will remove it and vice versa
-  // --------------------------------
-  // It's useful ONLY for sounds that were added globally (on all strings through addSoundMarksOnStrings method)
-  // otherwise if let's say sound was added on one specific fret it will remove it
-  // from this exact location and add it in all other ones!
-  switchSoundOnOff(sound) {
-    const index = sounds.indexOf(sound);
-    this.currentSounds[index] = !this.currentSounds[index];
-
-    const exacts = this.currentExactSounds.filter(x => x.sound === sounds[index]);
-    exacts.forEach(sound => this.currentSounds[index] ? this.addCurrentExactSound(sound) : this.removeCurrentExactSound(sound));
-
-    this.stringInstances.forEach(string =>
-      this.currentSounds[index] ?
-        string.markSound(index, this.namingConvention) :
-        string.removeMark(index)
-    );
+    this.currentExactSounds.sounds.forEach(sound => string.markExactSound(sound, this.namingConvention));
 
     return this;
   }

@@ -11,7 +11,7 @@ export class Tuning {
       steps.push(sound.distanceBetweenNotes(sound, this.sounds[index + 1])));
 
     steps.pop();
-    console.log(steps);
+
     return steps;
   }
 

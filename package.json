@@ -1,17 +1,21 @@
 {
-  "name": " ",
-  "version": "0.0.1",
-  "description": "",
-  "keywords": "",
-  "license": "",
-  "author": "",
-  "scripts": {
-    "build": "parcel build index.html",
-    "dev": "parcel index.html --open",
-    "start": "npm run build && npm run dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "custom-fretboard",
+  "version": "0.5.4",
+  "description": "Customizable fretboard with a bit of logic to find sounds places, add/remove strings, change tuning etc.",
+  "keywords": ["fretboard", "sound", "guitar"],
+  "license": "MIT",
+  "author": "DawidPartyka",
+  "bugs": {
+    "url": "https://github.com/DawidPartyka/fretboard-js/issues",
+    "email": "dawpar5@o2.pl"
   },
-  "devDependencies": {
-    "parcel-bundler": "^1.12.4"
-  }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DawidPartyka/fretboard-js",
+    "directory": "js/"
+  },
+  "files": ["/js/Fretboard.js", "/js/Fret.js", "/js/Note.js", "/js/Sound.js", "/js/StringLane.js", "/js/Tuning.js", "/js/index.js"],
+  "main": "js/index.js",
+  "browser": "js/index.js",
+  "type": "module"
 }

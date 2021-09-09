@@ -15,8 +15,7 @@ if it's standard / drop / double drop tuning.
 ## Initialization
 
 ```javascript
-import { Fretboard } from "./Fretboard.js"
-import { Sound, sounds } from "./Sound.js";
+import { Fretboard, Sound, sounds } from "custom-fretboard"
 
 const container = document.getElementById('fretboard'); // Some DOM element supposed to hold the fretboard
 
@@ -411,7 +410,7 @@ Receives:
 
 Returns: Tuning instance
 
-Gets a current sound and octave of every displayed string and returns those as Tuning instance,
+Gets current sound and octave of every displayed string and returns those as Tuning instance.
 
 ```javascript
 fretboardInstance.getStringLanesTuning();

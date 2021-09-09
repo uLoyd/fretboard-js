@@ -1,6 +1,5 @@
-import { Fretboard } from "./Fretboard.js";
-import { Sound, sounds } from "./Sound.js";
-import { Tuning } from "./Tuning.js";
+import { Fretboard, Sound, sounds, Tuning, Fret } from "./index.js";
+
 const container = document.getElementById('fretboard');
 
 const fretboardInstance = new Fretboard({
@@ -28,20 +27,20 @@ const fretboardInstance = new Fretboard({
     fretsClick: (tuning, fretSound, marked, evt) => {
       const soundIndex = sounds.indexOf(fretSound.sound);
       if(marked)
-        fretboardInstance.removeCurrentSound(soundIndex)
-          .addSoundMarksOnStrings();
+        fretboardInstance.currentSounds.remove(soundIndex);
       else
-        fretboardInstance.addCurrentSound(soundIndex)
-          .addSoundMarksOnStrings();
-    },
-    emptyStringClasses: ['col', 'd-flex', 'justify-content-center', 'empty_string']
+        fretboardInstance.currentSounds.add(soundIndex);
+
+      fretboardInstance.addSoundMarksOnStrings();
+    }
   })
-  .create([0, 3, 5, 7, 9, 12])
-  .addCurrentSound(0)
-  .addCurrentSound(3)
-  .addCurrentExactSound(new Sound('B', 4))
-  .addCurrentExactSound(new Sound('F#', 3))
-  .addSoundMarksOnStrings();
+  .create([0, 3, 5, 7, 9, 12]);
+
+fretboardInstance.currentSounds.add(0);
+fretboardInstance.currentSounds.add(3);
+fretboardInstance.currentExactSounds.add(new Sound('B', 4));
+fretboardInstance.currentExactSounds.add(new Sound('F#', 3));
+fretboardInstance.addSoundMarksOnStrings();
 
 const addStringButton = document.getElementById('addStringButton');
 addStringButton.addEventListener('click', () => {
@@ -94,6 +93,10 @@ const doubleDropTuning = new Tuning([
   new Sound('F#', 2),
   new Sound('B', 1)
 ]);
+
+console.assert(fretboardInstance.stringInstances[0].getFretsWithExactSound(
+  Sound.frequencyConstructor(110)) instanceof Fret
+);
 
 console.assert(standardTuning.isStandard() === true);
 console.assert(standardTuning.isDrop() === false);
