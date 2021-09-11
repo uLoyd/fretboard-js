@@ -51,6 +51,7 @@
   border-bottom: 0.5px solid black;
   background-image: url("../img/fret.png");
   background-size: cover;
+  min-height: 2vw;
 }
 
 .empty_string {

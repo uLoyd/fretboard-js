@@ -1,12 +1,11 @@
 import { Sound, sounds } from "./Sound.js";
-import { createDomElement } from "./utils.js";
+import { DomElem } from "./DomElem.js";
 
-export class Fret{
-  constructor(callback, classes) {
-    callback = callback ?? function(){};
-    this.domElement = null;
+export class Fret extends DomElem {
+  constructor(DomElemProps, callback = function (){}) {
+    super(DomElemProps);
+
     this.mark = null;
-    this.classes = classes ?? ['col', 'fret_place', 'd-flex', 'justify-content-center'];
     this.callback = () => {
       const mark = !!this.mark;
       return (evt) => {
@@ -24,10 +23,9 @@ export class Fret{
     return this;
   }
 
-  create(target) {
-    this.domElement = createDomElement('div', this.classes);
-    this.domElement.addEventListener('click', this.callback());
-    target.appendChild(this.domElement);
+  create(text, selector, classes) {
+    super.create(text, selector, classes);
+    this.elem.addEventListener('click', this.callback());
 
     return this;
   }
@@ -37,17 +35,16 @@ export class Fret{
       return;
 
     this.mark = note;
-    this.domElement.appendChild(this.mark.domElement);
-    this.mark.domElement.addEventListener('click', this.callback());
+    this.createInTarget({ element: this.mark });
+    this.mark.elem.addEventListener('click', this.callback());
     return this;
   }
 
-  clear(){
-    if(!this.mark)
-      return;
-
-    this.domElement.removeChild(this.mark.domElement);
+  empty() {
+    this.mark.remove();
     this.mark = null;
+
+    return this;
   }
 
   #getStringTuning = () => this.domElement.parentNode.children[0].value ?? sounds.indexOf(this.domElement.parentNode.children[0].innerText);

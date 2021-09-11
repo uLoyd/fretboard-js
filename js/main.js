@@ -1,109 +1,19 @@
-import { Fretboard, Sound, sounds, Tuning, Fret } from "./index.js";
+import {BasicStringLane, BasicFretboard, DomElem} from "./index.js";
 
-const container = document.getElementById('fretboard');
+const container = document.getElementById("fretboard");
 
-const fretboardInstance = new Fretboard({
-    container,
-    frets: 12,
-    tuning: [
-      new Sound('E', 4),
-      new Sound('B', 3),
-      new Sound('G', 3),
-      new Sound('D', 3),
-      new Sound('A', 2),
-      new Sound('E', 2)
-    ],
-    // evt - event...
-    // lane - StringLane instance
-    onTuningChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
-    // evt - event...
-    // lane - StringLane instance
-    onOctaveChangeEvt: (evt, lane) => fretboardInstance.addSoundMarksOnString(lane),
-    octaveRange: { min: 1, max: 9 },
-    // tuning - Sound instance with value of string
-    // fretSound - Sound instance with value of sound on a specific clicked fret
-    // marked - is the fret currently marked or not (Boolean)
-    // evt - event...
-    fretsClick: (tuning, fretSound, marked, evt) => {
-      const soundIndex = sounds.indexOf(fretSound.sound);
-      if(marked)
-        fretboardInstance.currentSounds.remove(soundIndex);
-      else
-        fretboardInstance.currentSounds.add(soundIndex);
+const StringLaneProps = [
+  { sound: 'E', octave: 4 },
+  { sound: 'B', octave: 3 },
+  { sound: 'G', octave: 3 },
+  { sound: 'D', octave: 3 },
+  { sound: 'A', octave: 2 },
+  { sound: 'E', octave: 2 }
+];
 
-      fretboardInstance.addSoundMarksOnStrings();
-    }
-  })
-  .create([0, 3, 5, 7, 9, 12]);
-
-fretboardInstance.currentSounds.add(0);
-fretboardInstance.currentSounds.add(3);
-fretboardInstance.currentExactSounds.add(new Sound('B', 4));
-fretboardInstance.currentExactSounds.add(new Sound('F#', 3));
-fretboardInstance.addSoundMarksOnStrings();
-
-const addStringButton = document.getElementById('addStringButton');
-addStringButton.addEventListener('click', () => {
-  const newString = fretboardInstance.addString(new Sound('A', 1));
-  fretboardInstance.addSoundMarksOnString(newString);
-});
-
-const removeStringButton = document.getElementById('removeStringButton');
-removeStringButton.addEventListener('click', () => {
-  const index = fretboardInstance.stringInstances.length - 1;
-  fretboardInstance.removeStringByIndex(index);
-});
-
-const noteSharp = document.getElementById('noteSharp');
-noteSharp.addEventListener('click', () => fretboardInstance.changeNamingConvention(sound =>
-  sound.sound + sound.octave));
-
-const noteFlat = document.getElementById('noteFlat');
-noteFlat.addEventListener('click', () => fretboardInstance.changeNamingConvention((sound) =>
-  (sound.flatNote ?? sound.sound) + (sound.flatOctave ?? sound.octave)
-));
-
-const noteFrequency = document.getElementById('noteFrequency');
-noteFrequency.addEventListener('click', () => fretboardInstance.changeNamingConvention(sound =>
-  `${ sound.getFrequencyFromDistance().toFixed(0) }Hz`));
-
-const standardTuning = new Tuning([
-  new Sound('E', 4),
-  new Sound('B', 3),
-  new Sound('G', 3),
-  new Sound('D', 3),
-  new Sound('A', 2),
-  new Sound('E', 2)
-]);
-
-const dropTuning = new Tuning([
-  new Sound('E', 4),
-  new Sound('B', 3),
-  new Sound('G', 3),
-  new Sound('D', 3),
-  new Sound('A', 2),
-  new Sound('D', 2)
-]);
-
-const doubleDropTuning = new Tuning([
-  new Sound('B', 3),
-  new Sound('G#', 3),
-  new Sound('E', 3),
-  new Sound('B', 2),
-  new Sound('F#', 2),
-  new Sound('B', 1)
-]);
-
-console.assert(fretboardInstance.stringInstances[0].getFretsWithExactSound(
-  Sound.frequencyConstructor(110)) instanceof Fret
-);
-
-console.assert(standardTuning.isStandard() === true);
-console.assert(standardTuning.isDrop() === false);
-console.assert(standardTuning.isDoubleDrop() === false);
-console.assert(dropTuning.isStandard() === false);
-console.assert(dropTuning.isDrop() === true);
-console.assert(dropTuning.isDoubleDrop() === false);
-console.assert(doubleDropTuning.isStandard() === false);
-console.assert(doubleDropTuning.isDrop() === false);
-console.assert(doubleDropTuning.isDoubleDrop() === true);
+BasicFretboard.init();
+BasicStringLane.init();
+const stringLanes = BasicStringLane.bulkConstructor(StringLaneProps);
+const fretboard = new BasicFretboard({ stringLanes });
+fretboard.createInTarget({ element: fretboard, atBeginning: true, target: container });
+fretboard.createStringLanes();

@@ -14,7 +14,7 @@
     "url": "https://github.com/DawidPartyka/fretboard-js",
     "directory": "js/"
   },
-  "files": ["/js/Fretboard.js", "/js/Fret.js", "/js/Note.js", "/js/Sound.js", "/js/StringLane.js", "/js/Tuning.js", "/js/index.js"],
+  "files": ["/js/Fretboard.js", "/js/Fret.js", "/js/Sound.js", "/js/StringLane.js", "/js/Tuning.js", "/js/index.js"],
   "main": "js/index.js",
   "browser": "js/index.js",
   "type": "module"
