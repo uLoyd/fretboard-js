@@ -4,10 +4,10 @@ export const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
 
 export class Sound {
   constructor(sound, octave) {
-    const index = sounds.indexOf(sound);
-    this.sound = sound;
+    this.sound = Number.isInteger(sound) ? sounds[sound] : sound;
     this.octave = parseFloat(octave);
-    this.flatNote = flats[index] ?? null;
+    this.soundIndex = sounds.indexOf(this.sound);
+    this.flatNote = flats[this.soundIndex] ?? null;
     this.flatOctave = this.flatNote ? this.flatNote === 'Cb' ? this.octave + 1 : this.octave : null;
   }
 

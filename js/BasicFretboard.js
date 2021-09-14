@@ -70,17 +70,6 @@ export class BasicFretboard extends Fretboard {
   removeStringByIndex = (index, removeDom = true, removeFromTuning = true) =>
     this.removeString(this.stringInstances[index], removeDom, removeFromTuning);
 
-  addExactSoundMarksOnStrings(sound, addToCurrent = true) {
-    if(addToCurrent)
-      this.exactSounds.add(sound);
-
-    this.stringInstances.forEach((string) => {
-      string.findSoundOctavePlace(sound);
-    });
-
-    return this;
-  }
-
   // Creates "marks" of sounds on corresponding frets. Shows the scale on fretboard in short.
   // Adds sound marks for EVERY sound on ALL strings!
   addSoundMarksOnStrings() {
@@ -89,23 +78,16 @@ export class BasicFretboard extends Fretboard {
     return this;
   }
 
-  // Index of a string same as in the "tuning" array passed to Fretboard class constructor
-  // StringLane instance is passed to addSoundMarksOnString which then returns Fretboard instance
-  addSoundMarksOnStringIndex(stringIndex) {
-    const string = this.stringInstances[stringIndex];
-    return this.addSoundMarksOnString(string);
-  }
-
   // Adds sound marks on one specific string. "string" parameter is a StringLane instance
   addSoundMarksOnString(string) {
     string.clearAllFrets();
 
-    this.currentSounds.sounds.forEach((sound, index) => {
+    this.generalSounds.sounds.forEach((sound, index) => {
       if (sound)
         string.markSound(index, this.namingConvention);
     });
 
-    this.currentExactSounds.sounds.forEach(sound => string.markExactSound(sound, this.namingConvention));
+    this.exactSounds.sounds.forEach(sound => string.markExactSound(sound));
 
     return this;
   }

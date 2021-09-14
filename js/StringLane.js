@@ -14,20 +14,25 @@ export class StringLane extends Sound {
   }
 
   findSoundPlace(soundIndex) {
-    if(!this.tuning)
-      return;
-
     const places = [];
     const currentTuning = sounds.indexOf(this.sound);
     const diff = currentTuning - soundIndex;
     let currentToPush = diff <= 0 ? Math.abs(diff) : 12 - diff;
 
-    while(this.frets > currentToPush){
+    while(this.frets >= currentToPush){
       places.push(currentToPush);
       currentToPush += 12;
     }
 
     return places;
+  }
+
+  findSoundByPlace(fretIndex) {
+    const dist = this.getDistanceFromNote() + fretIndex;
+    const note = Sound.getNoteFromDistance(dist);
+    const octave = Sound.getOctaveFromDistance(dist);
+
+    return new Sound(note, octave);
   }
 
   findSoundOctavePlace = sound => this.distanceBetweenNotes(sound);
