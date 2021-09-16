@@ -39,7 +39,7 @@ export class BasicTuningSelect extends DomElem {
 }
 
 export class BasicTuningElem extends DomElem {
-  constructor({ DomElemProps = {}, soundOptions = sounds, stringLane, octaveRange, onchange = function (){} }) {
+  constructor({ DomElemProps = {}, soundOptions = sounds, stringLane, octaveRange = { min: 1, max: 9 }, onchange = function (){} }) {
     super(DomElemProps);
 
     const range = [];

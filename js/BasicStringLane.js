@@ -4,8 +4,10 @@ import { DomElem } from "./DomElem.js";
 import { StringLane } from "./StringLane.js";
 
 export class BasicStringLane extends StringLane {
-  constructor(stringLaneProps, domElemProps, { fretDomElemProps, noteDomElemProps, callback } = {}) {
+  constructor({ stringLaneProps = {}, domElemProps, basicLaneProps = {} }) {
     super(stringLaneProps);
+
+    const { fretDomElemProps, noteDomElemProps, callback } = basicLaneProps;
     Object.assign(this, new DomElem(domElemProps ?? { classes: ['row', 'bg-dark', 'fret_lane'] })); // "multiple inheritance"
 
     this.fretInstances = new Array(this.frets);
@@ -25,7 +27,7 @@ export class BasicStringLane extends StringLane {
   }
 
   static bulkConstructor({ stringLaneProps, domElemProps, basicLaneProps }) {
-    return stringLaneProps.map(props => new BasicStringLane(props, domElemProps, basicLaneProps));
+    return stringLaneProps.map(props => new BasicStringLane({ stringLaneProps: props, domElemProps, basicLaneProps }));
   }
 
   createLane() {

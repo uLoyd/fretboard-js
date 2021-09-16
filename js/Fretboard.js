@@ -27,7 +27,7 @@ export class Fretboard {
   }
 
   addString(stringInst, index = this.stringInstances.length) {
-    if(this.findStringIndex(stringInst) === -1)
+    if(this.findStringIndex(stringInst) !== -1)
       throw "StringLane already exists in Fretboard";
 
     this.stringInstances.splice(index, 0, stringInst);

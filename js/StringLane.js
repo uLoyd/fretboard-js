@@ -9,8 +9,8 @@ export class StringLane extends Sound {
     this.frets = frets;
   }
 
-  static bulkConstructor(SoundProps, frets){
-    return SoundProps.map(({ sound, octave }) => new StringLane({ sound, octave, frets }));
+  static bulkConstructor(soundProps, frets){
+    return soundProps.map(({ sound, octave }) => new StringLane({ sound, octave, frets }));
   }
 
   findSoundPlace(soundIndex) {

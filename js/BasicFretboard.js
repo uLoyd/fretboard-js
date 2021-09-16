@@ -19,9 +19,8 @@ export class BasicFretboard extends Fretboard {
     return this;
   }
 
-  createStringAtIndex(string, index) {
+  createStringAtIndex(string, index = this.stringInstances.length) {
     const newString = string.createLane(this.elem);
-    this.addString(newString, index);
 
     if(index === this.stringInstances.length)
       this.createInTarget({ element: newString });
@@ -30,9 +29,9 @@ export class BasicFretboard extends Fretboard {
       this.createInTarget({ element: string.createLane(), atBeginning: true });
 
     else
-      this.createBefore({ element: newString, before: this.stringInstances[index] })
+      this.createBefore({ element: newString, before: this.stringInstances[index] });
 
-
+    this.addString(newString, index);
     return this;
   }
 

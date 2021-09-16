@@ -31,20 +31,29 @@ const stringLanes = BasicStringLane.bulkConstructor({
     callback: fretClick
   }
 });
-const fretboard = new BasicFretboard({ stringLanes });
-fretboard.createInTarget({ element: fretboard, atBeginning: true, target: container });
-fretboard.createStringLanes();
 
-fretboard.stringInstances.forEach(lane => {
+stringLanes.forEach(lane => {
   const tuning = new BasicTuningElem({
     stringLane: lane,
-    octaveRange: {
-      min: 1,
-      max: 9
-    },
     onchange: tuningChange
   }).createElem();
 
-  lane.addTuningElem(tuning);
-  tuning.createInTarget({ element: tuning, target: lane.elem, atBeginning: true});
+  lane.addTuningElem(tuning)
+    .createInTarget({ element: lane.tuningElement, atBeginning: true});
+});
+
+const fretboard = new BasicFretboard({ stringLanes });
+fretboard.createInTarget({ element: fretboard, atBeginning: true, target: container })
+  .createStringLanes();
+
+document.getElementById('addStringButton').addEventListener('click', () => {
+  const newString = new BasicStringLane({ basicLaneProps: { callback: fretClick } });
+
+  newString.addTuningElem(new BasicTuningElem({
+    stringLane: newString,
+    onchange: tuningChange
+  }).createElem())
+    .createInTarget({ element: newString.tuningElement, atBeginning: true});
+
+  fretboard.createStringAtIndex(newString);
 });
