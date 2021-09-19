@@ -66,7 +66,7 @@ export class BasicFretboard extends Fretboard {
   }
 
   // alternative to removeString method in case of using string index from stringInstances array instead of instance itself
-  removeStringByIndex = (index, removeDom = true, removeFromTuning = true) =>
+  removeStringByIndex = (index = this.stringInstances.length - 1, removeDom = true, removeFromTuning = true) =>
     this.removeString(this.stringInstances[index], removeDom, removeFromTuning);
 
   // Creates "marks" of sounds on corresponding frets. Shows the scale on fretboard in short.
@@ -105,7 +105,7 @@ export class BasicFretboard extends Fretboard {
   }
 
   getStringLanesTuning() {
-    return new Tuning(this.stringInstances.map(lane => lane.currentTuningValue()));
+    return new Tuning(this.stringInstances);
   }
 
   clearAllFrets() {

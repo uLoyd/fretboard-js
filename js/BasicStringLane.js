@@ -72,6 +72,11 @@ export class BasicStringLane extends StringLane {
     return props;
   }
 
+  // just override this to make it display anything else
+  namingConvention(sound) {
+    return sound.sound.toUpperCase() + sound.octave;
+  }
+
   // Marks ALL SOUNDS regardless of their octave
   markSound(soundIndex) {
     const places = this.findSoundPlace(soundIndex);
@@ -80,7 +85,7 @@ export class BasicStringLane extends StringLane {
       const dist = this.getDistanceFromNote() + place; // Distance of new sound = ( distance between A4 and this tuning ) + fretIndex
       const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
       const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
-      const mark = new DomElem(this.getNoteProps(soundIndex)).create(note.toUpperCase() + octave);
+      const mark = new DomElem(this.getNoteProps(soundIndex)).create(this.namingConvention(new Sound(note, octave)));
       this.fretInstances[place].noteMark(mark);
     });
 

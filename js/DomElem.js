@@ -39,6 +39,9 @@ export class DomElem {
 
   createBefore({ element = this, before, parent = this }) {
     parent = this.retrieveElem(parent);
+    before = this.retrieveElem(before);
+    element = this.retrieveElem(element);
+
     parent.insertBefore(element, before);
   }
 

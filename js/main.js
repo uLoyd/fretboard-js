@@ -57,3 +57,7 @@ document.getElementById('addStringButton').addEventListener('click', () => {
 
   fretboard.createStringAtIndex(newString);
 });
+
+document.getElementById('removeStringButton').addEventListener('click', () => {
+  fretboard.removeStringByIndex();
+});

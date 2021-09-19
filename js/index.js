@@ -10,5 +10,3 @@ export * from './BasicFretboard.js';
 export * from './DomElem.js';
 export * from './SoundStorage.js';
 export * from './utils.js';
-
-
