@@ -23,7 +23,7 @@ export class Fretboard {
       this.generalSounds.sounds = new Array(12).fill(false); // setting up the sounds array of SoundStorage
 
     this.exactSounds = generalSounds ?? new SoundStorage((sound, value) =>
-      sound.toString() === value.toString()); // Meant for Sound instances as those specify the exact octave
+      sound.soundString() === value.soundString()); // Meant for Sound instances as those specify the exact octave
   }
 
   addString(stringInst, index = this.stringInstances.length) {

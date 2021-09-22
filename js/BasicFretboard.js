@@ -35,17 +35,6 @@ export class BasicFretboard extends Fretboard {
     return this;
   }
 
-  addTuningElements(elements, create = true) {
-    this.stringInstances.forEach((lane, index) => {
-      lane.addTuningElem(elements[index]);
-
-      if(create)
-        lane.tuningElement.createElem();
-    });
-
-    return this;
-  }
-
   removeFretboard() {
     this.removeStrings()
       .remove();
@@ -53,14 +42,15 @@ export class BasicFretboard extends Fretboard {
     return this;
   }
 
-  removeString(string, removeDom = true) {
+  removeString(string, removeDom = true, removeFromTuning = true) {
     if(this.findStringIndex(string) < 0)
       throw "String does not exist";
 
     if (removeDom)
       string.remove();
 
-    super.removeString(string);
+    if(removeFromTuning)
+      super.removeString(string);
 
     return this;
   }
@@ -83,7 +73,7 @@ export class BasicFretboard extends Fretboard {
 
     this.generalSounds.sounds.forEach((sound, index) => {
       if (sound)
-        string.markSound(index, this.namingConvention);
+        string.markSound(index);
     });
 
     this.exactSounds.sounds.forEach(sound => string.markExactSound(sound));
@@ -91,21 +81,21 @@ export class BasicFretboard extends Fretboard {
     return this;
   }
 
-  changeNamingConvention(convention, reload = true) {
-    if(this.namingConvention === convention)
-      return this;
-
-    this.namingConvention = convention;
-
-    if(reload)
-      this.clearAllFrets()
-        .addSoundMarksOnStrings();
-
-    return this;
-  }
-
   getStringLanesTuning() {
     return new Tuning(this.stringInstances);
+  }
+
+  getOutdatedStringLanes() {
+    return this.stringInstances.filter(lane => lane.isTuningOutdated());
+  }
+
+  selfCheck(refreshMarks = true) {
+    this.getOutdatedStringLanes().forEach(lane => {
+      lane.updateTuning();
+
+      if(refreshMarks)
+        this.addSoundMarksOnString(lane);
+    });
   }
 
   clearAllFrets() {

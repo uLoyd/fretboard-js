@@ -1,6 +1,9 @@
-import { BasicStringLane, BasicFretboard, BasicTuningElem, sounds } from "./index.js";
+import { BasicStringLane, BasicFretboard, BasicTuningElem } from "./index.js";
 
 const container = document.getElementById("fretboard");
+
+BasicFretboard.init();
+BasicStringLane.init();
 
 const stringLaneProps = [
   { sound: 'E', octave: 4 },
@@ -11,19 +14,11 @@ const stringLaneProps = [
   { sound: 'E', octave: 2 }
 ];
 
-BasicFretboard.init();
-BasicStringLane.init();
-
-const tuningChange = (evt, tuning) => {
-  tuning.selected = evt.target.value;
-}
-
 const fretClick = (fret, lane, marked, evt) => {
   fretboard.generalSounds.reverse(lane.findSoundByPlace(fret).soundIndex);
   //fretboard.exactSounds.reverse(lane.findSoundByPlace(fret));
   fretboard.addSoundMarksOnStrings();
 }
-
 
 const stringLanes = BasicStringLane.bulkConstructor({
   stringLaneProps,
@@ -32,11 +27,22 @@ const stringLanes = BasicStringLane.bulkConstructor({
   }
 });
 
-stringLanes.forEach(lane => {
+const tuningChange = (evt, tuning) => {
+  tuning.selected = evt.target.value;
+  fretboard.selfCheck();
+}
+
+const tuningElementGenerator = (stringLane, create = true) => {
   const tuning = new BasicTuningElem({
-    stringLane: lane,
+    stringLane: stringLane,
     onchange: tuningChange
-  }).createElem();
+  });
+
+  return create ? tuning.createElem() : tuning;
+}
+
+stringLanes.forEach(lane => {
+  const tuning = tuningElementGenerator(lane);
 
   lane.addTuningElem(tuning)
     .createInTarget({ element: lane.tuningElement, atBeginning: true});
@@ -48,14 +54,13 @@ fretboard.createInTarget({ element: fretboard, atBeginning: true, target: contai
 
 document.getElementById('addStringButton').addEventListener('click', () => {
   const newString = new BasicStringLane({ basicLaneProps: { callback: fretClick } });
+  const tuning = tuningElementGenerator(newString);
 
-  newString.addTuningElem(new BasicTuningElem({
-    stringLane: newString,
-    onchange: tuningChange
-  }).createElem())
+  newString.addTuningElem(tuning)
     .createInTarget({ element: newString.tuningElement, atBeginning: true});
 
-  fretboard.createStringAtIndex(newString);
+  fretboard.createStringAtIndex(newString)
+    .addSoundMarksOnString(newString);
 });
 
 document.getElementById('removeStringButton').addEventListener('click', () => {

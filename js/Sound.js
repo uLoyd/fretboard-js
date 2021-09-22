@@ -87,5 +87,5 @@ export class Sound {
     return res < 0 ? 12 + res : res;
   }
 
-  toString = () => `${this.sound}${this.octave}`;
+  soundString = () => `${this.sound}${this.octave}`;
 }

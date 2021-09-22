@@ -4,19 +4,24 @@ import { DomElem } from "./DomElem.js";
 import { StringLane } from "./StringLane.js";
 
 export class BasicStringLane extends StringLane {
-  constructor({ stringLaneProps = {}, domElemProps, basicLaneProps = {} }) {
+  constructor({ stringLaneProps = {}, domElemProps =  { classes: ['row', 'bg-dark', 'fret_lane'] }, basicLaneProps = {} }) {
     super(stringLaneProps);
 
-    const { fretDomElemProps, noteDomElemProps, callback } = basicLaneProps;
-    Object.assign(this, new DomElem(domElemProps ?? { classes: ['row', 'bg-dark', 'fret_lane'] })); // "multiple inheritance"
+    const {
+      fretDomElemProps = { classes: ['col', 'fret_place', 'd-flex', 'justify-content-center'] },
+      noteDomElemProps = { classes: ['rounded', 'col', 'p-1', 'fret_mark'] },
+      callback,
+      includeZeroFret = true
+    } = basicLaneProps;
 
-    this.fretInstances = new Array(this.frets);
-    this.callback = callback;
+    Object.assign(this, new DomElem(domElemProps)); // "multiple inheritance"
 
-    this.fretDomElemProps = fretDomElemProps ?? { classes: ['col', 'fret_place', 'd-flex', 'justify-content-center'] };
-    this.noteDomElemProps = noteDomElemProps ?? { classes: ['rounded', 'col', 'p-1', 'fret_mark'] };
-
+    this.fretDomElemProps = fretDomElemProps;
+    this.noteDomElemProps = noteDomElemProps;
     this.tuningElement = null;
+    this.fretInstances = new Array(includeZeroFret ? this.frets + 1 : this.frets)
+      .fill(null);
+    this.callback = callback;
   }
 
   static init() {
@@ -31,13 +36,9 @@ export class BasicStringLane extends StringLane {
   }
 
   createLane() {
-    this.create();
-
-    // "less than equal" cause 12 frets = < 0, 1, 2 ... 12 >
-    for(let i = 0; i <= this.frets; i++){
-      const fret = new Fret(this.fretDomElemProps, this);
-      this.createInTarget({ element: fret });
-      this.fretInstances[i] = fret;
+    for(let i = 0; i < this.fretInstances.length; i++){
+      this.fretInstances[i] = new Fret(this.fretDomElemProps, this);
+      this.createInTarget({ element: this.fretInstances[i] });
     }
 
     return this;
@@ -49,8 +50,8 @@ export class BasicStringLane extends StringLane {
     return this;
   }
 
-  addTuningElem(DomElem) {
-    this.tuningElement = DomElem;
+  addTuningElem(domElem) {
+    this.tuningElement = domElem;
 
     return this;
   }
@@ -59,7 +60,7 @@ export class BasicStringLane extends StringLane {
     return this.findSoundPlace(soundIndex).map(place => this.fretInstances[place]);
   }
 
-  getFretsWithExactSound(sound) {
+  getFretWithExactSound(sound) {
     return this.fretInstances[this.findSoundOctavePlace(sound)];
   }
 
@@ -79,6 +80,9 @@ export class BasicStringLane extends StringLane {
 
   // Marks ALL SOUNDS regardless of their octave
   markSound(soundIndex) {
+    if(this.fretInstances.some(fret => !fret))
+      return this;
+
     const places = this.findSoundPlace(soundIndex);
 
     places.forEach(place => {
@@ -96,7 +100,7 @@ export class BasicStringLane extends StringLane {
     const place = this.findSoundOctavePlace(sound);
 
     if(place >= 0 && place <= this.frets)
-      this.fretInstances[place].noteMark(new DomElem(this.getNoteProps(sound)).create(sound.toString().toUpperCase()));
+      this.fretInstances[place].noteMark(new DomElem(this.getNoteProps(sound)).create(this.namingConvention(sound)));
 
     return this;
   }
@@ -109,11 +113,16 @@ export class BasicStringLane extends StringLane {
   }
 
   isTuningOutdated() {
-    return this.toString() !== this.tuningElement.getTuning().toString();
+    return this.soundString() !== this.tuningElement.getTuning().soundString();
+  }
+
+  updateTuning() {
+    const newSound = this.tuningElement.getTuning();
+    return super.updateTuning(newSound);
   }
 
   clearAllFrets() {
-    this.fretInstances.forEach(fret => fret.empty());
+    this.fretInstances.forEach(fret => fret?.empty());
     return this;
   }
 }

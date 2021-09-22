@@ -1,4 +1,3 @@
-import { Sound, sounds } from "./Sound.js";
 import { DomElem } from "./DomElem.js";
 
 export class Fret extends DomElem {

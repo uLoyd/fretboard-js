@@ -1,5 +1,6 @@
 export class DomElem {
-  constructor({ selector = 'div', classes = [] }) {
+  constructor(obj = {}) {
+    const { selector = 'div', classes = [] } = obj;
     this.selector = selector;
     this.classes = classes;
     this.elem = null;

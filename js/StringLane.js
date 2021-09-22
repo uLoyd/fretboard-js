@@ -1,5 +1,5 @@
 import { uuidv4 } from "./utils.js";
-import { Sound, sounds } from "./Sound.js";
+import {flats, Sound, sounds} from "./Sound.js";
 
 export class StringLane extends Sound {
   constructor({ sound = 'A', octave = 4, frets = 12 }) {
@@ -33,6 +33,24 @@ export class StringLane extends Sound {
     const octave = Sound.getOctaveFromDistance(dist);
 
     return new Sound(note, octave);
+  }
+
+  #copySoundData(soundData){
+    const { sound, octave, soundIndex, flatNote, flatOctave } = soundData;
+
+    this.sound = sound;
+    this.octave = octave;
+    this.soundIndex = soundIndex;
+    this.flatNote = flatNote;
+    this.flatOctave = flatOctave;
+  }
+
+  // can be just a Sound instance as well
+  updateTuning(sound, octave) {
+    const soundData = sound instanceof Sound ? sound : new Sound(sound, octave);
+    this.#copySoundData(soundData);
+
+    return this;
   }
 
   findSoundOctavePlace = sound => this.distanceBetweenNotes(sound);
