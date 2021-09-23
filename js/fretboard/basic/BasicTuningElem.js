@@ -1,4 +1,4 @@
-import { DomElem, Sound, sounds } from "./index.js";
+import { DomElem, Sound, sounds } from "../index.js";
 
 export class BasicTuningSelect extends DomElem {
   constructor({ DomElemProps = { selector: 'select' }, optionsDomElemProps = { selector: 'option' }, options, selected, onchange }) {

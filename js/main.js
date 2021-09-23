@@ -1,11 +1,11 @@
-import { BasicStringLane, BasicFretboard, BasicTuningElem } from "./index.js";
+import { BasicStringLane, BasicFretboard, BasicTuningElem } from "./fretboard";
+
+BasicFretboard.init();
+BasicStringLane.init();
 
 const container = document.getElementById("fretboard");
 
 let currentConvention = (sound) => sound.soundString();
-
-BasicFretboard.init();
-BasicStringLane.init();
 
 const stringLaneProps = [
   { sound: 'E', octave: 4 },
@@ -24,7 +24,7 @@ const fretClick = (fret, lane, marked, evt) => {
 
 const basicLaneProps = () => {
   return {
-    callback: fretClick ,
+    callback: fretClick,
     namingConvention: currentConvention
   }
 }
@@ -88,3 +88,5 @@ document.getElementById('noteFrequency').addEventListener('click', () => {
   currentConvention = (sound) => `${ sound.getFrequencyFromDistance().toFixed(0) }Hz`;
   fretboard.changeNamingConvention(currentConvention);
 });
+
+console.log(fretboard.getStringLanesTuning().Standard);

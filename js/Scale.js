@@ -1,4 +1,4 @@
-import { createDomElement, uuidv4 } from "./utils.js";
+import { createDomElement, uuidv4 } from "./fretboard";
 
 export class ScaleLib{
   constructor(scales) {

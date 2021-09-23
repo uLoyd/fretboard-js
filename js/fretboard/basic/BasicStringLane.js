@@ -1,7 +1,7 @@
-import { Sound, sounds } from "./Sound.js";
-import { Fret } from "./Fret.js";
-import { DomElem } from "./DomElem.js";
-import { StringLane } from "./StringLane.js";
+import { Sound, sounds } from "../components/Sound.js";
+import { Fret } from "../components/Fret.js";
+import { DomElem } from "../components/DomElem.js";
+import { StringLane } from "../components/StringLane.js";
 
 const defaults = {
   namingConvention: (sound) => sound.soundString(),
@@ -15,18 +15,13 @@ export class BasicStringLane extends StringLane {
   constructor({ stringLaneProps = {}, domElemProps =  { classes: ['row', 'bg-dark', 'fret_lane'] }, basicLaneProps = {} }) {
     super(stringLaneProps);
 
-    let { fretDomElemProps, noteDomElemProps, callback, includeZeroFret, namingConvention } = basicLaneProps;
-
     Object.assign(this, new DomElem(domElemProps)); // "multiple inheritance"
 
-    this.fretDomElemProps = fretDomElemProps ?? defaults.fretDomElemProps;
-    this.noteDomElemProps = noteDomElemProps ?? defaults.noteDomElemProps;
-    this.namingConvention = namingConvention ?? defaults.namingConvention;
-    this.callback = callback ?? defaults.callback;
-    includeZeroFret = includeZeroFret ?? defaults.includeZeroFret;
+    for (const [key, value] of Object.entries(defaults))
+      this[key] = basicLaneProps[key] ?? value;
 
     this.tuningElement = null;
-    this.fretInstances = new Array(includeZeroFret ? this.frets + 1 : this.frets)
+    this.fretInstances = new Array(this.includeZeroFret ? this.frets + 1 : this.frets)
       .fill(null);
   }
 
@@ -51,8 +46,9 @@ export class BasicStringLane extends StringLane {
   }
 
   createLaneInTarget(target) {
-    this.createLane();
-    this.createInTarget({ element: this, target });
+    this.createLane()
+      .createInTarget({ element: this, target });
+
     return this;
   }
 

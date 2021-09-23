@@ -1,4 +1,5 @@
-import { Tuning , Fretboard, DomElem } from "./index.js";
+import { DomElem } from "../index.js";
+import { Fretboard } from "../components/Fretboard.js";
 
 export class BasicFretboard extends Fretboard {
   constructor({ stringLanes, DomElemProps = {}, generalSounds, exactSounds}) {
@@ -79,10 +80,6 @@ export class BasicFretboard extends Fretboard {
     this.exactSounds.sounds.forEach(sound => string.markExactSound(sound));
 
     return this;
-  }
-
-  getStringLanesTuning() {
-    return new Tuning(this.stringInstances);
   }
 
   getOutdatedStringLanes() {

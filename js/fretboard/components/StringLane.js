@@ -1,5 +1,5 @@
 import { uuidv4 } from "./utils.js";
-import {flats, Sound, sounds} from "./Sound.js";
+import { flats, Sound, sounds } from "./Sound.js";
 
 export class StringLane extends Sound {
   constructor({ sound = 'A', octave = 4, frets = 12 }) {
@@ -36,13 +36,8 @@ export class StringLane extends Sound {
   }
 
   #copySoundData(soundData){
-    const { sound, octave, soundIndex, flatNote, flatOctave } = soundData;
-
-    this.sound = sound;
-    this.octave = octave;
-    this.soundIndex = soundIndex;
-    this.flatNote = flatNote;
-    this.flatOctave = flatOctave;
+    for (const [key, value] of Object.entries(soundData))
+      this[key] = value;
   }
 
   // can be just a Sound instance as well

@@ -1,6 +1,6 @@
 {
   "name": "custom-fretboard",
-  "version": "0.5.4",
+  "version": "0.6.0",
   "description": "Customizable fretboard with a bit of logic to find sounds places, add/remove strings, change tuning etc.",
   "keywords": ["fretboard", "sound", "guitar"],
   "license": "MIT",
@@ -14,8 +14,15 @@
     "url": "https://github.com/DawidPartyka/fretboard-js",
     "directory": "js/"
   },
-  "files": ["/js/Fretboard.js", "/js/Fret.js", "/js/Sound.js", "/js/StringLane.js", "/js/Tuning.js", "/js/index.js"],
-  "main": "js/index.js",
+  "files": [
+    "/js/fretboard/components/Fretboard.js",
+    "/js/fretboard/components/Fret.js",
+    "/js/fretboard/components/Sound.js",
+    "/js/fretboard/components/StringLane.js",
+    "/js/fretboard/components/Tuning.js",
+    "/js/fretboard/index.js"
+  ],
+  "main": "js/fretboard/index.js",
   "browser": "js/index.js",
   "type": "module"
 }

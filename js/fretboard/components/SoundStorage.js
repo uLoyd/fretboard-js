@@ -49,3 +49,22 @@ export class SoundStorage {
     return this.sounds.findIndex((value, id) => this.comparison(sound, value, id));
   }
 }
+
+const generalStorage = new SoundStorage(
+  (sound, value, id) => id === sound,
+  (sound, sounds) => {
+    sounds[sound] = true;
+    return sounds;
+  },
+  (index, sounds) => {
+    sounds[index] = false;
+    return sounds;
+  }
+);
+generalStorage.sounds = new Array(12).fill(false);
+
+const exactStorage = new SoundStorage((sound, value) =>
+  sound.soundString() === value.soundString());
+
+export const defaultGeneralStorage = generalStorage;
+export const defaultExactStorage = exactStorage;
