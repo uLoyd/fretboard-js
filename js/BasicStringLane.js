@@ -3,25 +3,31 @@ import { Fret } from "./Fret.js";
 import { DomElem } from "./DomElem.js";
 import { StringLane } from "./StringLane.js";
 
+const defaults = {
+  namingConvention: (sound) => sound.soundString(),
+  fretDomElemProps: { classes: ['col', 'fret_place', 'd-flex', 'justify-content-center'] },
+  noteDomElemProps: { classes: ['rounded', 'col', 'p-1', 'fret_mark'] },
+  callback: () => {},
+  includeZeroFret: true
+}
+
 export class BasicStringLane extends StringLane {
   constructor({ stringLaneProps = {}, domElemProps =  { classes: ['row', 'bg-dark', 'fret_lane'] }, basicLaneProps = {} }) {
     super(stringLaneProps);
 
-    const {
-      fretDomElemProps = { classes: ['col', 'fret_place', 'd-flex', 'justify-content-center'] },
-      noteDomElemProps = { classes: ['rounded', 'col', 'p-1', 'fret_mark'] },
-      callback,
-      includeZeroFret = true
-    } = basicLaneProps;
+    let { fretDomElemProps, noteDomElemProps, callback, includeZeroFret, namingConvention } = basicLaneProps;
 
     Object.assign(this, new DomElem(domElemProps)); // "multiple inheritance"
 
-    this.fretDomElemProps = fretDomElemProps;
-    this.noteDomElemProps = noteDomElemProps;
+    this.fretDomElemProps = fretDomElemProps ?? defaults.fretDomElemProps;
+    this.noteDomElemProps = noteDomElemProps ?? defaults.noteDomElemProps;
+    this.namingConvention = namingConvention ?? defaults.namingConvention;
+    this.callback = callback ?? defaults.callback;
+    includeZeroFret = includeZeroFret ?? defaults.includeZeroFret;
+
     this.tuningElement = null;
     this.fretInstances = new Array(includeZeroFret ? this.frets + 1 : this.frets)
       .fill(null);
-    this.callback = callback;
   }
 
   static init() {
@@ -66,16 +72,19 @@ export class BasicStringLane extends StringLane {
 
   getNoteProps(sound) {
     const index = Number.isInteger(sound) ? sound : sounds.indexOf(sound.sound);
-    const soundCSSclass = `n${sounds[index].toLowerCase().replace('#', 's')}`;
+    const soundCSSClass = `n${sounds[index].toLowerCase().replace('#', 's')}`;
     const props = JSON.parse(JSON.stringify(this.noteDomElemProps));
-    props.classes.push(soundCSSclass);
+    props.classes.push(soundCSSClass);
 
     return props;
   }
 
-  // just override this to make it display anything else
-  namingConvention(sound) {
-    return sound.sound.toUpperCase() + sound.octave;
+  getFretSound(index) {
+    const dist = this.getDistanceFromNote() + index; // Distance of new sound = ( distance between A4 and this tuning ) + fretIndex
+    const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
+    const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
+
+    return new Sound(note, octave);
   }
 
   // Marks ALL SOUNDS regardless of their octave
@@ -86,10 +95,9 @@ export class BasicStringLane extends StringLane {
     const places = this.findSoundPlace(soundIndex);
 
     places.forEach(place => {
-      const dist = this.getDistanceFromNote() + place; // Distance of new sound = ( distance between A4 and this tuning ) + fretIndex
-      const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
-      const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
-      const mark = new DomElem(this.getNoteProps(soundIndex)).create(this.namingConvention(new Sound(note, octave)));
+      const sound = this.getFretSound(place);
+      const mark = new DomElem(this.getNoteProps(soundIndex))
+        .create(this.namingConvention(sound));
       this.fretInstances[place].noteMark(mark);
     });
 
@@ -97,6 +105,9 @@ export class BasicStringLane extends StringLane {
   }
 
   markExactSound(sound) {
+    if(this.fretInstances.some(fret => !fret))
+      return this;
+
     const place = this.findSoundOctavePlace(sound);
 
     if(place >= 0 && place <= this.frets)
@@ -119,6 +130,16 @@ export class BasicStringLane extends StringLane {
   updateTuning() {
     const newSound = this.tuningElement.getTuning();
     return super.updateTuning(newSound);
+  }
+
+  reloadFretText() {
+    if(this.fretInstances.some(fret => !fret))
+      return this;
+
+    this.fretInstances.forEach((fret, index) => {
+      if(fret.mark)
+        fret.mark.elem.innerText = this.namingConvention(this.getFretSound(index));
+    });
   }
 
   clearAllFrets() {

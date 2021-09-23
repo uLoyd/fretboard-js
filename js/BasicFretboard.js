@@ -98,6 +98,17 @@ export class BasicFretboard extends Fretboard {
     });
   }
 
+  reloadFretText() {
+    this.stringInstances.forEach(lane => lane.reloadFretText());
+  }
+
+  changeNamingConvention(convention, reload = true) {
+    this.stringInstances.forEach(lane => lane.namingConvention = convention);
+
+    if(reload)
+      this.reloadFretText();
+  }
+
   clearAllFrets() {
     this.stringInstances.forEach(string => string.clearAllFrets());
     return this;

@@ -2,6 +2,8 @@ import { BasicStringLane, BasicFretboard, BasicTuningElem } from "./index.js";
 
 const container = document.getElementById("fretboard");
 
+let currentConvention = (sound) => sound.soundString();
+
 BasicFretboard.init();
 BasicStringLane.init();
 
@@ -20,11 +22,16 @@ const fretClick = (fret, lane, marked, evt) => {
   fretboard.addSoundMarksOnStrings();
 }
 
+const basicLaneProps = () => {
+  return {
+    callback: fretClick ,
+    namingConvention: currentConvention
+  }
+}
+
 const stringLanes = BasicStringLane.bulkConstructor({
   stringLaneProps,
-  basicLaneProps: {
-    callback: fretClick
-  }
+  basicLaneProps: basicLaneProps()
 });
 
 const tuningChange = (evt, tuning) => {
@@ -53,7 +60,7 @@ fretboard.createInTarget({ element: fretboard, atBeginning: true, target: contai
   .createStringLanes();
 
 document.getElementById('addStringButton').addEventListener('click', () => {
-  const newString = new BasicStringLane({ basicLaneProps: { callback: fretClick } });
+  const newString = new BasicStringLane({ basicLaneProps: basicLaneProps() });
   const tuning = tuningElementGenerator(newString);
 
   newString.addTuningElem(tuning)
@@ -65,4 +72,19 @@ document.getElementById('addStringButton').addEventListener('click', () => {
 
 document.getElementById('removeStringButton').addEventListener('click', () => {
   fretboard.removeStringByIndex();
+});
+
+document.getElementById('noteFlat').addEventListener('click', () => {
+  currentConvention = (sound) => (sound.flatNote ?? sound.sound) + (sound.flatOctave ?? sound.octave);
+  fretboard.changeNamingConvention(currentConvention);
+});
+
+document.getElementById('noteSharp').addEventListener('click', () => {
+  currentConvention = (sound) => sound.soundString();
+  fretboard.changeNamingConvention(currentConvention);
+});
+
+document.getElementById('noteFrequency').addEventListener('click', () => {
+  currentConvention = (sound) => `${ sound.getFrequencyFromDistance().toFixed(0) }Hz`;
+  fretboard.changeNamingConvention(currentConvention);
 });

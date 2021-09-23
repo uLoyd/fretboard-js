@@ -64,8 +64,10 @@ export class Sound {
         break;
     }
 
+    // sounds start from C while in sounds array those are sorted alphabetically
+    // so lines below apply offset if needed
     if(distance < -9) octaves--;
-    if(distance > 2) octaves++;
+    else if(distance > 2) octaves++;
     return octaves;
   }
 
