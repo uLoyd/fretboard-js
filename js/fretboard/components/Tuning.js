@@ -1,4 +1,4 @@
-//import { Sound, sounds } from "./Sound.js";
+import { Sound } from "./Sound.js";
 
 export class ITuning {
   constructor(sounds, name) {
@@ -8,6 +8,10 @@ export class ITuning {
   }
 
   check() {
+    throw "This method should be abstract";
+  }
+
+  generate() {
     throw "This method should be abstract";
   }
 
@@ -37,6 +41,17 @@ export class StandardTuning extends ITuning {
 
     return steps.every(step => step === 5);
   }
+
+  // startSound = top/highest string
+  generate({ startSound = new Sound('E', '4'), strings = 6 } = {}){
+    const result = [startSound];
+    --strings;
+
+    for(let i = 0; i < strings; ++i)
+      result.push(Sound.getSoundFromDistance(result[result.length - 1].getDistanceFromNote() - ( i === 1 ? 4 : 5)));
+
+    return result;
+  }
 }
 
 export class DropTuning extends StandardTuning {
@@ -48,6 +63,14 @@ export class DropTuning extends StandardTuning {
     const lastNote = steps.pop();
 
     return lastNote !== 7 ? false : super.check(steps);
+  }
+
+  generate({startSound = new Sound('E', '4'), strings = 6} = {}) {
+    const result = super.generate({ startSound, strings });
+    const keypos = result.length - 1;
+    result[keypos] = Sound.getSoundFromDistance(result[keypos].getDistanceFromNote() - 2);
+
+    return result;
   }
 }
 
@@ -66,6 +89,14 @@ export class DoubleDropTuning extends ITuning {
 
     return lastNote === 7 && firstNote === 3 && secondNote === 4;
   }
+
+  generate({startSound = new Sound('E', '4'), strings = 6} = {}) {
+    const result = DropTuning.prototype.generate({ startSound, strings });
+    const keypos = 0;
+    result[keypos] = Sound.getSoundFromDistance(result[keypos].getDistanceFromNote() - 2);
+
+    return result;
+  }
 }
 
 export class WildcardTuning extends ITuning {
@@ -74,6 +105,10 @@ export class WildcardTuning extends ITuning {
   }
 
   check = () => true;
+
+  generate() {
+    throw "Unknown tuning - cannot generate";
+  }
 }
 
 export class TuningFinder {

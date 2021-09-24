@@ -1,4 +1,4 @@
-import { BasicStringLane, BasicFretboard, BasicTuningElem } from "./fretboard";
+import { BasicStringLane, BasicFretboard, BasicTuningElem, StandardTuning, defaultTuningFinder } from "./fretboard";
 
 BasicFretboard.init();
 BasicStringLane.init();
@@ -6,15 +6,6 @@ BasicStringLane.init();
 const container = document.getElementById("fretboard");
 
 let currentConvention = (sound) => sound.soundString();
-
-const stringLaneProps = [
-  { sound: 'E', octave: 4 },
-  { sound: 'B', octave: 3 },
-  { sound: 'G', octave: 3 },
-  { sound: 'D', octave: 3 },
-  { sound: 'A', octave: 2 },
-  { sound: 'E', octave: 2 }
-];
 
 const fretClick = (fret, lane, marked, evt) => {
   fretboard.generalSounds.reverse(lane.findSoundByPlace(fret).soundIndex);
@@ -30,7 +21,7 @@ const basicLaneProps = () => {
 }
 
 const stringLanes = BasicStringLane.bulkConstructor({
-  stringLaneProps,
+  stringLaneProps: new StandardTuning().generate(),
   basicLaneProps: basicLaneProps()
 });
 
@@ -60,7 +51,15 @@ fretboard.createInTarget({ element: fretboard, atBeginning: true, target: contai
   .createStringLanes();
 
 document.getElementById('addStringButton').addEventListener('click', () => {
-  const newString = new BasicStringLane({ basicLaneProps: basicLaneProps() });
+  const currentTuning = defaultTuningFinder.find(fretboard.stringInstances);
+
+  const nextSound = currentTuning.Unknown ? {}
+    : currentTuning.generate({strings: fretboard.stringInstances.length + 1})[fretboard.stringInstances.length]; // works fine only for standard
+                                                                                                                 // tuning rn, but a fix is possible
+  const newString = new BasicStringLane({
+    stringLaneProps: nextSound,
+    basicLaneProps: basicLaneProps()
+  });
   const tuning = tuningElementGenerator(newString);
 
   newString.addTuningElem(tuning)

@@ -1,3 +1,4 @@
+//##################### 0    1     2    3    4     5    6     7    8    9     10   11
 export const sounds = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'];
 export const flats =  [null, 'Bb', 'Cb', null, 'Db', null, 'Eb', 'Fb', null, 'Gb', null, 'Ab'];
 export const A4 = 440; // Sound A in 4th octave by ISO standard is 440 Hz
@@ -87,6 +88,13 @@ export class Sound {
     const res = id1 - id2;
 
     return res < 0 ? 12 + res : res;
+  }
+
+  static getSoundFromDistance(dist) {
+    const note = Sound.getNoteFromDistance(dist);
+    const octave = Sound.getOctaveFromDistance(dist);
+
+    return new Sound(note, octave);
   }
 
   soundString = () => `${this.sound}${this.octave}`;
