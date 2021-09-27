@@ -21,8 +21,11 @@ export class DomElem {
   }
 
   retrieveElem(element) {
-    if(!element)
+    if(!element){
+      console.error('DomElem.retrieveElem bad argument');
       throw `DomElem received null/undefined element or target: ${element}`;
+    }
+
 
     return element['create'] ?
       element.elem ? element.elem : element.create().elem :
@@ -47,7 +50,7 @@ export class DomElem {
   }
 
   empty() {
-    this.elem.empty();
+    this.elem.innerHTML = '';
     return this;
   }
 

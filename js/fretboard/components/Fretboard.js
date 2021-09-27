@@ -1,11 +1,15 @@
-import { defaultTuningFinder, Sound, defaultExactStorage, defaultGeneralStorage } from "../index.js";
+import { DefaultTuningFinder } from "./TuningFinder.js";
+import { ExactStorage, GeneralStorage } from "./SoundStorage.js";
+import { Sound} from "./Sound.js";
+
+const defaultFinder = new DefaultTuningFinder();
 
 // Basically just a holder for StringLane instances
 export class Fretboard {
   constructor({strings, generalSounds, exactSounds} = {}) {
-    this.stringInstances = strings; // [ StringLane instances ]
-    this.generalSounds = generalSounds ?? defaultGeneralStorage; // Meant for sounds in all octaves
-    this.exactSounds = exactSounds ?? defaultExactStorage; // Meant for Sound instances as those specify the exact octave
+    this.stringInstances = strings ?? []; // [ StringLane instances ]
+    this.generalSounds = generalSounds ?? new GeneralStorage(); // Meant for sounds in all octaves
+    this.exactSounds = exactSounds ?? new ExactStorage(); // Meant for Sound instances as those specify the exact octave
   }
 
   addString(stringInst, index = this.stringInstances.length) {
@@ -42,7 +46,7 @@ export class Fretboard {
 
   findStringIndex = (string) => this.stringInstances.findIndex(x => x.id === string.id);
 
-  getStringLanesTuning() {
-    return defaultTuningFinder.find(this.stringInstances.map(lane => new Sound(lane.sound, lane.octave)));
+  getStringLanesTuning(finder = defaultFinder) {
+    return finder.find(this.stringInstances.map(lane => new Sound(lane.sound, lane.octave)));
   }
 }

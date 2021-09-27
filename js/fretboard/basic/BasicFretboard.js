@@ -1,8 +1,8 @@
-import { DomElem } from "../index.js";
+import { DomElem } from "../components/DomElem.js";
 import { Fretboard } from "../components/Fretboard.js";
 
 export class BasicFretboard extends Fretboard {
-  constructor({ stringLanes, DomElemProps = {}, generalSounds, exactSounds}) {
+  constructor({ stringLanes, DomElemProps = {}, generalSounds, exactSounds } = {}) {
     super({ strings: stringLanes, generalSounds, exactSounds }); // Basic String Lane instances
     Object.assign(this, new DomElem(DomElemProps)); // "Multiple inheritance"
   }
@@ -14,20 +14,16 @@ export class BasicFretboard extends Fretboard {
     });
   }
 
-  createStringLanes(stringLanes = this.stringInstances) {
-    stringLanes.forEach(lane => lane.createLaneInTarget(this.elem));
+  createStringAtIndex(string, index) {
+    index = this.stringInstances?.length ?? 0;
 
-    return this;
-  }
-
-  createStringAtIndex(string, index = this.stringInstances.length) {
     const newString = string.createLane(this.elem);
 
     if(index === this.stringInstances.length)
       this.createInTarget({ element: newString });
 
     else if(index === 0)
-      this.createInTarget({ element: string.createLane(), atBeginning: true });
+      this.createInTarget({ element: newString, atBeginning: true });
 
     else
       this.createBefore({ element: newString, before: this.stringInstances[index] });
@@ -99,11 +95,15 @@ export class BasicFretboard extends Fretboard {
     this.stringInstances.forEach(lane => lane.reloadFretText());
   }
 
-  changeNamingConvention(convention, reload = true) {
+  setNamingConvention(convention, reload = true) {
     this.stringInstances.forEach(lane => lane.namingConvention = convention);
 
     if(reload)
       this.reloadFretText();
+  }
+
+  setFretClick(callback) {
+    this.stringInstances.forEach(lane => lane.callback = callback);
   }
 
   clearAllFrets() {

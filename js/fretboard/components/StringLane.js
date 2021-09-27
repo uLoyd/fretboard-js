@@ -1,4 +1,4 @@
-import { uuidv4 } from "./utils.js";
+import { uuidv4 } from "../utils/utils.js";
 import { flats, Sound, sounds } from "./Sound.js";
 
 export class StringLane extends Sound {
@@ -11,6 +11,10 @@ export class StringLane extends Sound {
 
   static bulkConstructor(soundProps, frets){
     return soundProps.map(({ sound, octave }) => new StringLane({ sound, octave, frets }));
+  }
+
+  getFretSound(index) {
+    return Sound.getSoundFromDistance(this.getDistanceFromNote() + index);
   }
 
   findSoundPlace(soundIndex) {

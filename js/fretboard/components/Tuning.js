@@ -2,7 +2,7 @@ import { Sound } from "./Sound.js";
 
 export class ITuning {
   constructor(sounds, name) {
-    this.sounds = sounds;
+    this.sounds = sounds ?? [];
     this.name = name;
     this[name] = true;
   }
@@ -90,7 +90,8 @@ export class DoubleDropTuning extends ITuning {
     return lastNote === 7 && firstNote === 3 && secondNote === 4;
   }
 
-  generate({startSound = new Sound('E', '4'), strings = 6} = {}) {
+  generate({startSound = new Sound('D', '4'), strings = 6} = {}) {
+    startSound = Sound.getSoundFromDistance(startSound.getDistanceFromNote() + 2);
     const result = DropTuning.prototype.generate({ startSound, strings });
     const keypos = 0;
     result[keypos] = Sound.getSoundFromDistance(result[keypos].getDistanceFromNote() - 2);
@@ -110,33 +111,3 @@ export class WildcardTuning extends ITuning {
     throw "Unknown tuning - cannot generate";
   }
 }
-
-export class TuningFinder {
-  constructor() {
-    this.tunings = [];
-
-    for(let i = 0; i < arguments.length; ++i)
-      this.registerTuning(arguments[i]);
-  }
-
-  registerTuning(tuning) {
-    if(!(new tuning() instanceof ITuning))
-      throw "Tuning class passed to TuningFinder doesn't extend ITuning";
-
-    this.tunings.push(tuning);
-  }
-
-  removeTuning(tuning) {
-    this.tunings = this.tunings.filter(check => tuning !== check);
-
-    return this;
-  }
-
-  find(sounds) {
-    const result = this.tunings.find(tuning => new tuning(sounds).check());
-
-    return result ? new result(sounds) : false;
-  }
-}
-
-export const defaultTuningFinder = new TuningFinder(StandardTuning, DropTuning, DoubleDropTuning, WildcardTuning);

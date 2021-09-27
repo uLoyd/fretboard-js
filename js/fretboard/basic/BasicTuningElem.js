@@ -1,4 +1,5 @@
-import { DomElem, Sound, sounds } from "../index.js";
+import { DomElem } from "../components/DomElem.js";
+import { Sound, sounds } from "../components/Sound.js";
 
 export class BasicTuningSelect extends DomElem {
   constructor({ DomElemProps = { selector: 'select' }, optionsDomElemProps = { selector: 'option' }, options, selected, onchange }) {
@@ -22,9 +23,6 @@ export class BasicTuningSelect extends DomElem {
   }
 
   createOptions(valueCallback) {
-    if(!this.elem)
-      this.create();
-
     this.options.forEach( option => {
       const opt = new DomElem(this.optionsDomElemProps);
       this.createInTarget({ element: opt.create(option) });
@@ -59,10 +57,10 @@ export class BasicTuningElem extends DomElem {
     });
   }
 
-  createElem() {
-    this.create()
-      .createInTarget({ element: this.sound.createOptions().create() })
-      .createInTarget({ element: this.octave.createOptions().create() });
+  create() {
+    super.create()
+      .createInTarget({ element: this.sound.createOptions() })
+      .createInTarget({ element: this.octave.createOptions() });
 
     return this;
   }
@@ -72,3 +70,14 @@ export class BasicTuningElem extends DomElem {
   }
 }
 
+export const basicTuningElemGenerator = (stringLane, fretboard) => {
+  const tuningChange = (evt, tuning) => {
+    tuning.selected = evt.target.value;
+    fretboard.selfCheck();
+  }
+
+  return new BasicTuningElem({
+    stringLane,
+    onchange: tuningChange
+  });
+}

@@ -1,34 +1,14 @@
-function isFunc(something){
-  return something && something instanceof Function;
-}
-
-export class SoundStorage {
-  // addAction and removeAction are optional, enabling custom add / remove behaviour
+export class ISoundStorage {
   constructor(comparison, addAction, removeAction) {
-    if(!isFunc(comparison))
-      throw "Callback serving the purpose of value comparison is required";
-
     this.sounds = [];
     this.comparison = comparison;
-
-    this.addAction = isFunc(addAction) ? addAction : null;
-
-    this.removeAction = isFunc(removeAction) ? removeAction : null;
   }
 
-  add(sound) {
-    if(!this.find(sound))
-      this.addAction ? this.sounds = this.addAction(sound, this.sounds) : this.sounds.push(sound);
-
+  add() {
     return this;
   }
 
-  remove(sound) {
-    const index = this.findIndex(sound);
-
-    if(index > -1)
-      this.removeAction ? this.sounds = this.removeAction(index, this.sounds) : this.sounds.splice(index, 1);
-
+  remove() {
     return this;
   }
 
@@ -48,23 +28,47 @@ export class SoundStorage {
   findIndex(sound) {
     return this.sounds.findIndex((value, id) => this.comparison(sound, value, id));
   }
+
+  empty() {
+    this.sounds = [];
+    return this;
+  }
 }
 
-const generalStorage = new SoundStorage(
-  (sound, value, id) => id === sound,
-  (sound, sounds) => {
-    sounds[sound] = true;
-    return sounds;
-  },
-  (index, sounds) => {
-    sounds[index] = false;
-    return sounds;
+export class GeneralStorage extends ISoundStorage {
+  constructor(comparison = (sound, value, id) => id === sound) {
+    super(comparison);
+    this.sounds = new Array(12).fill(false);
   }
-);
-generalStorage.sounds = new Array(12).fill(false);
 
-const exactStorage = new SoundStorage((sound, value) =>
-  sound.soundString() === value.soundString());
+  add(soundIndex) {
+    this.sounds[soundIndex] = true;
+    return this;
+  }
 
-export const defaultGeneralStorage = generalStorage;
-export const defaultExactStorage = exactStorage;
+  remove(soundIndex) {
+    this.sounds[soundIndex] = false;
+  }
+}
+
+export class ExactStorage extends ISoundStorage {
+  constructor(comparison = (sound, value) => sound.soundString() === value.soundString()) {
+    super(comparison);
+  }
+
+  add(sound) {
+    if(!this.find(sound))
+      this.sounds.push(sound);
+
+    return this;
+  }
+
+  remove(sound) {
+    const index = this.findIndex(sound);
+
+    if(index > -1)
+      this.sounds.splice(index, 1);
+
+    return this;
+  }
+}

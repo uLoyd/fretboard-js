@@ -2,25 +2,22 @@ import { Sound, sounds } from "../components/Sound.js";
 import { Fret } from "../components/Fret.js";
 import { DomElem } from "../components/DomElem.js";
 import { StringLane } from "../components/StringLane.js";
-
-const defaults = {
-  namingConvention: (sound) => sound.soundString(),
-  fretDomElemProps: { classes: ['col', 'fret_place', 'd-flex', 'justify-content-center'] },
-  noteDomElemProps: { classes: ['rounded', 'col', 'p-1', 'fret_mark'] },
-  callback: () => {},
-  includeZeroFret: true
-}
+import { basicTuningElemGenerator } from "./BasicTuningElem.js";
 
 export class BasicStringLane extends StringLane {
-  constructor({ stringLaneProps = {}, domElemProps =  { classes: ['row', 'bg-dark', 'fret_lane'] }, basicLaneProps = {} }) {
+  namingConvention = () => {};
+  includeZeroFret = true;
+  callback = () => {};
+  noteDomElemProps = [];
+  fretDomElemProps = [];
+
+  // basicLaneProps = { namingConvention, includeZeroFret, callback, noteDomElemProps, fretDomElemProps }
+  constructor({ stringLaneProps, domElemProps, basicLaneProps }) {
     super(stringLaneProps);
 
     Object.assign(this, new DomElem(domElemProps)); // "multiple inheritance"
+    Object.assign(this, basicLaneProps);
 
-    for (const [key, value] of Object.entries(defaults))
-      this[key] = basicLaneProps[key] ?? value;
-
-    this.tuningElement = null;
     this.fretInstances = new Array(this.includeZeroFret ? this.frets + 1 : this.frets)
       .fill(null);
   }
@@ -52,8 +49,14 @@ export class BasicStringLane extends StringLane {
     return this;
   }
 
-  addTuningElem(domElem) {
-    this.tuningElement = domElem;
+  addTuningElem({ fretboard, generator = basicTuningElemGenerator, create = true }) {
+    if(this.tuningElement)
+      return this;
+
+    this.tuningElement = generator(this, fretboard);
+
+    if(create)
+      this.createInTarget({ element: this.tuningElement, atBeginning: true });
 
     return this;
   }
@@ -73,14 +76,6 @@ export class BasicStringLane extends StringLane {
     props.classes.push(soundCSSClass);
 
     return props;
-  }
-
-  getFretSound(index) {
-    const dist = this.getDistanceFromNote() + index; // Distance of new sound = ( distance between A4 and this tuning ) + fretIndex
-    const octave = Sound.getOctaveFromDistance(dist); // Gets octave of new sound
-    const note = sounds[Sound.getNoteFromDistance(dist)]; // Gets symbol of new sound
-
-    return new Sound(note, octave);
   }
 
   // Marks ALL SOUNDS regardless of their octave
@@ -113,8 +108,13 @@ export class BasicStringLane extends StringLane {
   }
 
   removeMark(soundIndex) {
-    this.findSoundPlace(soundIndex)
-      .forEach(place => this.fretInstances[place].empty());
+    this.getFretsWithSound(soundIndex).forEach(fret => fret.empty());
+
+    return this;
+  }
+
+  removeExactMark(sound) {
+    this.getFretWithExactSound(sound).empty();
 
     return this;
   }
