@@ -1,65 +1,41 @@
 import {
-  DefaultTuningFinder,
-  StandardTuning,
-  GenericStringBuilder,
-  GenericFretboardBuilder,
   FlatOctave,
   SharpOctave,
-  Frequency
+  Frequency, BasicStringLaneBuilder, BasicStringLane, BasicTuningElem
 } from "./fretboard";
+import { CustomFretboard } from "./CustomFretboard.js";
 
 const container = document.getElementById("fretboard");
+const customFretboard = new CustomFretboard().init(container);
 
-let currentConvention = SharpOctave;
+// code below only creates dummy string lane which displays given fret numbers
+const fretMarkLane = new BasicStringLaneBuilder(BasicStringLane)
+  .setDomElemProps({classes: ['row', 'bg-dark', 'fret_lane']})
+  .setBasicLaneProps({includeZeroFret: true})
+  .setFretDomElemProps({classes: ['col', 'd-flex', 'justify-content-center']})
+  .get().createLane();
 
-const fretboard = GenericFretboardBuilder();
-fretboard.createInTarget({ element: fretboard, target: container, atBeginning: true });
+fretMarkLane.tuningElement = new BasicTuningElem({});
+fretMarkLane.createInTarget({
+  element: fretMarkLane.tuningElement,
+  atBeginning: true
+}).createInTarget({target: container, element: fretMarkLane});
 
-document.getElementById('addStringButton').addEventListener('click', () => {
-  const newTuningProps = { strings: fretboard.stringInstances.length + 1, startSound: fretboard.stringInstances[0] };
-  const foundTuning = new DefaultTuningFinder().find(fretboard.stringInstances);
-  const tuning = (foundTuning.Unknown ? new StandardTuning() : foundTuning).generate(newTuningProps);
-  fretboard.empty();
+fretMarkLane.tuningElement.sound.elem.style.visibility = 'hidden';
+fretMarkLane.tuningElement.octave.elem.style.visibility = 'hidden';
+[0, 3, 5, 7, 9, 12].forEach(x => fretMarkLane.fretInstances[x].elem.innerText = x);
 
-  fretboard.stringInstances = tuning.map(sound => GenericStringBuilder(sound, fretboard, currentConvention));
+// button click events
+document.getElementById('addStringButton').addEventListener('click', () => customFretboard.addString());
 
-  fretboard.addSoundMarksOnStrings();
-});
+document.getElementById('removeStringButton').addEventListener('click', () => customFretboard.fretboard.removeStringByIndex());
 
-document.getElementById('removeStringButton').addEventListener('click', () => {
-  fretboard.removeStringByIndex();
-});
+document.getElementById('noteFlat').addEventListener('click', () => customFretboard.changeConvention(FlatOctave));
 
-document.getElementById('noteFlat').addEventListener('click', () => {
-  currentConvention = FlatOctave;
-  fretboard.setNamingConvention(currentConvention);
-});
+document.getElementById('noteSharp').addEventListener('click', () => customFretboard.changeConvention(SharpOctave));
 
-document.getElementById('noteSharp').addEventListener('click', () => {
-  currentConvention = SharpOctave;
-  fretboard.setNamingConvention(currentConvention);
-});
+document.getElementById('noteFrequency').addEventListener('click', () => customFretboard.changeConvention(Frequency));
 
-document.getElementById('noteFrequency').addEventListener('click', () => {
-  currentConvention = Frequency;
-  fretboard.setNamingConvention(currentConvention);
-});
+document.getElementById('allSounds').addEventListener('click', () => customFretboard.changeSoundAll());
 
-document.getElementById('allSounds').addEventListener('click', () => {
-  fretboard.exactSounds.sounds.forEach(sound => fretboard.generalSounds.add(sound.soundIndex));
-  fretboard.exactSounds.empty();
-  fretboard.addSoundMarksOnStrings();
-
-  fretboard.setFretClick((fret, lane) => {
-    fretboard.exactSounds.sounds.forEach(sound => fretboard.generalSounds.add(sound.soundIndex));
-    fretboard.generalSounds.reverse(lane.findSoundByPlace(fret).soundIndex);
-    fretboard.addSoundMarksOnStrings();
-  })
-});
-
-document.getElementById('sameOctave').addEventListener('click', () => {
-  fretboard.setFretClick((fret, lane) => {
-    fretboard.exactSounds.reverse(lane.findSoundByPlace(fret));
-    fretboard.addSoundMarksOnStrings();
-  })
-});
+document.getElementById('sameOctave').addEventListener('click', () => customFretboard.changeSoundSameOctave());

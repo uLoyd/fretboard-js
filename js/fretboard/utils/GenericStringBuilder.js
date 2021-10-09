@@ -8,7 +8,7 @@ export const GenericStringBuilder = (sound, fretboard, namingConvention = SharpO
     fretboard.addSoundMarksOnStrings();
   }
 
-  return new BasicStringLaneBuilder(sound, BasicStringLane)
+  return new BasicStringLaneBuilder(BasicStringLane, sound)
     .setDomElemProps({ classes: ['row', 'bg-dark', 'fret_lane'] })
     .setBasicLaneProps({
       namingConvention,

@@ -2,7 +2,7 @@ import { uuidv4 } from "../utils/utils.js";
 import { flats, Sound, sounds } from "./Sound.js";
 
 export class StringLane extends Sound {
-  constructor({ sound = 'A', octave = 4, frets = 12 }) {
+  constructor({ sound = 'A', octave = 4, frets = 12 } = {}) {
     super(sound, octave);
 
     this.id = uuidv4(); // StringLane has an id in case of two strings with the same sound and octave in 1 fretboard

@@ -1,10 +1,11 @@
 import { basicTuningElemGenerator } from "./BasicTuningElem.js";
 
 export class BasicStringLaneBuilder {
-  constructor(props, StringLaneClass){
+  constructor(StringLaneClass, props){
     StringLaneClass.init();
     this.stringLaneProps = props;
     this.stringLaneClass = StringLaneClass;
+    this.basicLaneProps = {};
   }
 
   setDomElemProps(props) {
