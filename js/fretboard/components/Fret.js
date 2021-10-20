@@ -5,17 +5,18 @@ export class Fret extends DomElem {
     super(DomElemProps);
 
     this.mark = null;
-    this.callback = () => {
+    this.callback = (markElem) => {
       return (evt) => {
         evt.stopPropagation();
 
         const mark = !!this.mark;
         const offset = lane.tuningElement ? 1 : 0;
-        const fret = Array.prototype.indexOf.call(this.elem.parentNode.children, mark ? evt.target.parentNode : evt.target) - offset;
+        const fret = Array.prototype.indexOf.call(this.elem.parentNode.children, markElem ? evt.target.parentNode : evt.target) - offset;
 
         lane.callback(fret, lane, mark, evt);
       }
     }
+
   }
 
   create(text, selector, classes) {
@@ -31,7 +32,7 @@ export class Fret extends DomElem {
 
     this.mark = note;
     this.createInTarget({ element: this.mark });
-    this.mark.elem.addEventListener('click', this.callback());
+    this.mark.elem.addEventListener('click', this.callback(true));
     return this;
   }
 
