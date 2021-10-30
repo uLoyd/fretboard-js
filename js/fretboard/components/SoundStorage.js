@@ -48,6 +48,7 @@ export class GeneralStorage extends ISoundStorage {
 
   remove(soundIndex) {
     this.sounds[soundIndex] = false;
+    return this;
   }
 }
 
